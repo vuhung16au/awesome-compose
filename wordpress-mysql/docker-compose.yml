@@ -1,0 +1,59 @@
+
+# Docker Compose configuration for WordPress, MySQL, and phpMyAdmin
+
+services:
+  # MySQL Database service
+  db:
+    image: mysql:latest    # Latest stable MySQL image
+    restart: always        # Ensures the container restarts if it fails
+    volumes:
+      - db_data:/var/lib/mysql    # Persistent volume for database data
+    environment:
+      - MYSQL_ROOT_PASSWORD=wordpress    # Root password for MySQL
+      - MYSQL_DATABASE=wordpress         # Database name for WordPress
+      - MYSQL_USER=wordpress             # User for WordPress database
+      - MYSQL_PASSWORD=wordpress         # Password for WordPress database user
+    networks:
+      - wordpress_network    # Join the defined network
+
+  # WordPress service
+  wordpress:
+    image: wordpress:latest    # Latest stable WordPress image
+    depends_on:
+      - db    # Ensures db service starts first
+    restart: always
+    ports:
+      - "80:80"    # Expose WordPress on port 80
+    environment:
+      - WORDPRESS_DB_HOST=db               # Use the service name to connect
+      - WORDPRESS_DB_USER=wordpress        # Match MySQL user
+      - WORDPRESS_DB_PASSWORD=wordpress    # Match MySQL password
+      - WORDPRESS_DB_NAME=wordpress        # Match MySQL database name
+    networks:
+      - wordpress_network    # Join the defined network
+
+  # phpMyAdmin service
+  phpmyadmin:
+    image: phpmyadmin:latest    # Latest stable phpMyAdmin image
+    depends_on:
+      - db    # Ensures db service starts first
+    restart: always
+    ports:
+      - "8080:80"    # Expose phpMyAdmin on port 8080
+    environment:
+      - PMA_HOST=db                # Connect to MySQL using service name
+      - PMA_USER=wordpress         # Match MySQL user
+      - PMA_PASSWORD=wordpress     # Match MySQL password
+      - MYSQL_ROOT_PASSWORD=wordpress    # Root password for admin access
+    networks:
+      - wordpress_network    # Join the defined network
+
+# Networks configuration
+networks:
+  wordpress_network:    # Define a bridge network for service communication
+    driver: bridge
+
+# Volumes configuration
+volumes:
+  db_data:    # Named volume for persistent database storage
+    driver: local
