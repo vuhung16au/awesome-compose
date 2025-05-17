@@ -13,6 +13,15 @@ This directory contains a Docker Compose setup for Bitnami Moodle with automated
 7. Use the provided sample user accounts to log in. (admin) username/password: user/bitnami
 8. To stop the application, run `docker compose down`.
 
+## Rebuild bitnami/moodle
+
+```bash
+docker compose down
+docker rmi -f $(docker images -q)
+docker compose build
+docker compose up -d --build
+```
+
 ## Screenshots
 
 ### Moodle Dashboard

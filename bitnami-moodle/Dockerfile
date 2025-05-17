@@ -26,6 +26,7 @@ RUN apt-get update && apt-get install -y \
 #     chmod +x /opt/bitnami/scripts/apply-theme.sh
 
 # Download and install the Academi theme
+# TODO Not working yet. Need to install manually from Moodle UI
 # RUN mkdir -p /opt/bitnami/moodle/theme/academi && \
 #     wget -q -O /tmp/academi.zip https://github.com/lmsace/academi/releases/download/v5.0.1/theme_academi_v-5.0.zip && \
 #     unzip -q /tmp/academi.zip -d /tmp && \
@@ -34,4 +35,4 @@ RUN apt-get update && apt-get install -y \
 #     chown -R 1001:1001 /opt/bitnami/moodle/theme/academi
 
 # Switch back to non-root user for better security
-# USER 1001
+USER 1001
