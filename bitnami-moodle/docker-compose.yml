@@ -1,0 +1,73 @@
+services:
+  mariadb:
+    image: docker.io/bitnami/mariadb:latest
+    environment:
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - ALLOW_EMPTY_PASSWORD=yes
+      - MARIADB_USER=bn_moodle
+      - MARIADB_PASSWORD=bitnami
+      - MARIADB_DATABASE=bitnami_moodle
+      - MARIADB_CHARACTER_SET=utf8mb4
+      - MARIADB_COLLATE=utf8mb4_unicode_ci
+    volumes:
+      - 'mariadb_data:/bitnami/mariadb'
+      # - './sample_data.sql:/docker-entrypoint-initdb.d/sample_data.sql'
+      # - './99-import-sample-data.sh:/docker-entrypoint-initdb.d/99-import-sample-data.sh'
+    networks:
+      - moodle-network
+  moodle:
+    # image: docker.io/bitnami/moodle:5.0  # removed this line
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # args:
+        # - EXTRA_LOCALES=vi_VN.UTF-8 UTF-8, ja_JP.UTF-8 UTF-8
+    # image: custom-moodle:academi-theme
+    ports:
+      - '80:8080'
+      - '443:8443'
+    environment:
+      - MOODLE_DATABASE_HOST=mariadb
+      - MOODLE_DATABASE_PORT_NUMBER=3306
+      - MOODLE_DATABASE_USER=bn_moodle
+      - MOODLE_DATABASE_PASSWORD=bitnami
+      - MOODLE_DATABASE_NAME=bitnami_moodle
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - ALLOW_EMPTY_PASSWORD=yes
+      # Gmail SMTP configuration
+      - MOODLE_SMTP_HOST=smtp.gmail.com
+      - MOODLE_SMTP_PORT=587
+      - MOODLE_SMTP_USER=your_email@gmail.com
+      - MOODLE_SMTP_PASSWORD=your_password
+      - MOODLE_SMTP_PROTOCOL=tls
+      # Theme configuration
+      - MOODLE_SITE_DEFAULT_THEME=academi
+    volumes:
+      - 'moodle_data:/bitnami/moodle'
+      - 'moodledata_data:/bitnami/moodledata'
+    depends_on:
+      - mariadb
+    networks:
+      - moodle-network
+  phpmyadmin:
+    image: docker.io/bitnami/phpmyadmin:latest
+    ports:
+      - '8080:8080'
+    environment:
+      - DATABASE_HOST=mariadb
+      - DATABASE_PORT_NUMBER=3306
+    depends_on:
+      - mariadb
+    networks:
+      - moodle-network
+volumes:
+  mariadb_data:
+    driver: local
+  moodle_data:
+    driver: local
+  moodledata_data:
+    driver: local
+networks:
+  moodle-network:
+    driver: bridge
+
