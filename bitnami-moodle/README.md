@@ -88,3 +88,9 @@ If sample data doesn't load:
 1. Check the MariaDB logs: `docker-compose logs mariadb`
 2. Ensure the initialization scripts have execute permissions
 3. Try rebuilding the containers: `docker-compose build --no-cache`
+
+## References
+
+1. https://hub.docker.com/r/bitnami/moodle
+2. https://moodle.org/plugins/mod_attendance
+3. https://moodle.org/plugins/theme_academi/v5.0.1/36072
