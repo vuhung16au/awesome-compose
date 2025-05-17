@@ -2,6 +2,17 @@
 
 This directory contains a Docker Compose setup for Bitnami Moodle with automated sample data loading.
 
+## How to Use
+
+1. Clone this repository.
+2. Navigate to the `bitnami-moodle` directory.
+3. Install Docker and Docker Compose if not already installed.
+4. Run the following command to start the application `docker compose up -d`.
+5. Access Moodle at [http://localhost:80](http://localhost:80).
+6. Access phpMyAdmin at [http://localhost:8080](http://localhost:8080).
+7. Use the provided sample user accounts to log in. (admin) username/password: user/bitnami
+8. To stop the application, run `docker compose down`.
+
 ## Screenshots
 
 ### Moodle Dashboard
