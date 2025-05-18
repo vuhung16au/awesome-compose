@@ -56,32 +56,27 @@ RUN mkdir -p /run/apache2 && \
     sed -i 's#Directory "/var/www/localhost/htdocs"#Directory "/var/www/html"#g' /etc/apache2/httpd.conf && \
     sed -i 's/^#LoadModule rewrite_module/LoadModule rewrite_module/g' /etc/apache2/httpd.conf && \
     sed -i 's#AllowOverride None#AllowOverride All#g' /etc/apache2/httpd.conf && \
-    sed -i 's#^ServerName www.example.com:80#ServerName localhost#g' /etc/apache2/httpd.conf
+    sed -i 's#^ServerName www.example.com:80#ServerName localhost#g' /etc/apache2/httpd.conf && \
+    echo '<FilesMatch \.php$>' >> /etc/apache2/httpd.conf && \
+    echo '    SetHandler "proxy:fcgi://127.0.0.1:9000"' >> /etc/apache2/httpd.conf && \
+    echo '</FilesMatch>' >> /etc/apache2/httpd.conf && \
+    echo 'DirectoryIndex index.php index.html' >> /etc/apache2/httpd.conf
 
-# Create wp-config.php with environment variable support
-RUN echo '<?php \n\
-define("DB_HOST", getenv("WORDPRESS_DB_HOST")); \n\
-define("DB_USER", getenv("WORDPRESS_DB_USER")); \n\
-define("DB_PASSWORD", getenv("WORDPRESS_DB_PASSWORD")); \n\
-define("DB_NAME", getenv("WORDPRESS_DB_NAME")); \n\
-define("AUTH_KEY", "put your unique phrase here"); \n\
-define("SECURE_AUTH_KEY", "put your unique phrase here"); \n\
-define("LOGGED_IN_KEY", "put your unique phrase here"); \n\
-define("NONCE_KEY", "put your unique phrase here"); \n\
-define("AUTH_SALT", "put your unique phrase here"); \n\
-define("SECURE_AUTH_SALT", "put your unique phrase here"); \n\
-define("LOGGED_IN_SALT", "put your unique phrase here"); \n\
-define("NONCE_SALT", "put your unique phrase here"); \n\
-$table_prefix = "wp_"; \n\
-define("WP_DEBUG", false); \n\
-if ( !defined("ABSPATH") ) define("ABSPATH", dirname(__FILE__) . "/"); \n\
-require_once(ABSPATH . "wp-settings.php"); \n\
-' > /var/www/html/wp-config.php
+# Copy and use script to create wp-config.php
+COPY create-wp-config.sh /tmp/
+RUN chmod +x /tmp/create-wp-config.sh && /tmp/create-wp-config.sh
 
 # Set permissions
 RUN chown -R apache:apache /var/www/html
 
 WORKDIR /var/www/html
+
+# Configure PHP-FPM
+RUN sed -i 's/listen = 127.0.0.1:9000/listen = 9000/g' /etc/php82/php-fpm.d/www.conf && \
+    sed -i 's/;listen.owner = nobody/listen.owner = apache/g' /etc/php82/php-fpm.d/www.conf && \
+    sed -i 's/;listen.group = nobody/listen.group = apache/g' /etc/php82/php-fpm.d/www.conf && \
+    sed -i 's/user = nobody/user = apache/g' /etc/php82/php-fpm.d/www.conf && \
+    sed -i 's/group = nobody/group = apache/g' /etc/php82/php-fpm.d/www.conf
 
 # Create entrypoint script
 RUN echo -e '#!/bin/sh\nphp-fpm82 -D\nhttpd -D FOREGROUND' > /usr/local/bin/docker-entrypoint.sh && \

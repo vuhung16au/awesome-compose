@@ -20,9 +20,7 @@ services:
 
   # MariaDB service configuration
   mariadb:
-    build:
-      context: .
-      dockerfile: Dockerfile.mariadb  # Using multi-stage build for optimization
+    image: mariadb:10.9  # Using official MariaDB 10.9 image
     restart: always  # Ensures the container restarts automatically if it fails
     environment:
       - MYSQL_ROOT_PASSWORD=wordpress  # Root password for MariaDB
