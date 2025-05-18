@@ -1,0 +1,91 @@
+FROM php:8.1-alpine AS builder
+
+# Install only the necessary extensions
+RUN apk add --no-cache \
+    curl \
+    tar \
+    mysql-client \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    libzip-dev \
+    libmemcached-dev \
+    freetype-dev
+
+# Install PHP extensions
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg && \
+    docker-php-ext-install -j$(nproc) \
+    mysqli \
+    pdo \
+    pdo_mysql \
+    opcache \
+    gd \
+    zip
+
+# Download WordPress
+RUN curl -o wordpress.tar.gz -SL https://wordpress.org/wordpress-6.4.tar.gz && \
+    tar -xzf wordpress.tar.gz -C /var/www/ && \
+    rm wordpress.tar.gz && \
+    chown -R www-data:www-data /var/www/wordpress
+
+# Final stage with minimal components
+FROM alpine:3.18
+
+# Install Apache and PHP
+RUN apk add --no-cache \
+    php82 \
+    php82-fpm \
+    php82-mysqli \
+    php82-pdo \
+    php82-pdo_mysql \
+    php82-gd \
+    php82-xml \
+    php82-curl \
+    php82-mbstring \
+    php82-opcache \
+    php82-zip \
+    php82-session \
+    apache2 \
+    apache2-proxy
+
+# Copy WordPress files
+COPY --from=builder /var/www/wordpress /var/www/html
+
+# Configure Apache
+RUN mkdir -p /run/apache2 && \
+    sed -i 's#^DocumentRoot ".*#DocumentRoot "/var/www/html"#g' /etc/apache2/httpd.conf && \
+    sed -i 's#Directory "/var/www/localhost/htdocs"#Directory "/var/www/html"#g' /etc/apache2/httpd.conf && \
+    sed -i 's/^#LoadModule rewrite_module/LoadModule rewrite_module/g' /etc/apache2/httpd.conf && \
+    sed -i 's#AllowOverride None#AllowOverride All#g' /etc/apache2/httpd.conf && \
+    sed -i 's#^ServerName www.example.com:80#ServerName localhost#g' /etc/apache2/httpd.conf
+
+# Create wp-config.php with environment variable support
+RUN echo '<?php \n\
+define("DB_HOST", getenv("WORDPRESS_DB_HOST")); \n\
+define("DB_USER", getenv("WORDPRESS_DB_USER")); \n\
+define("DB_PASSWORD", getenv("WORDPRESS_DB_PASSWORD")); \n\
+define("DB_NAME", getenv("WORDPRESS_DB_NAME")); \n\
+define("AUTH_KEY", "put your unique phrase here"); \n\
+define("SECURE_AUTH_KEY", "put your unique phrase here"); \n\
+define("LOGGED_IN_KEY", "put your unique phrase here"); \n\
+define("NONCE_KEY", "put your unique phrase here"); \n\
+define("AUTH_SALT", "put your unique phrase here"); \n\
+define("SECURE_AUTH_SALT", "put your unique phrase here"); \n\
+define("LOGGED_IN_SALT", "put your unique phrase here"); \n\
+define("NONCE_SALT", "put your unique phrase here"); \n\
+$table_prefix = "wp_"; \n\
+define("WP_DEBUG", false); \n\
+if ( !defined("ABSPATH") ) define("ABSPATH", dirname(__FILE__) . "/"); \n\
+require_once(ABSPATH . "wp-settings.php"); \n\
+' > /var/www/html/wp-config.php
+
+# Set permissions
+RUN chown -R apache:apache /var/www/html
+
+WORKDIR /var/www/html
+
+# Create entrypoint script
+RUN echo -e '#!/bin/sh\nphp-fpm82 -D\nhttpd -D FOREGROUND' > /usr/local/bin/docker-entrypoint.sh && \
+    chmod +x /usr/local/bin/docker-entrypoint.sh
+
+EXPOSE 80
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

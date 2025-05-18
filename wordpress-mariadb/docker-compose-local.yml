@@ -2,7 +2,9 @@
 services:
   # WordPress service configuration
   wordpress:
-    image: wordpress:latest  # Uses the latest stable WordPress image
+    build:
+      context: .
+      dockerfile: Dockerfile.wordpress  # Using multi-stage build for optimization
     ports:
       - "80:80"  # Exposes port 80 on the host, mapped to container port 80
     restart: always  # Ensures the container restarts automatically if it fails
@@ -18,7 +20,9 @@ services:
 
   # MariaDB service configuration
   mariadb:
-    image: mariadb:latest  # Uses the latest stable MariaDB image
+    build:
+      context: .
+      dockerfile: Dockerfile.mariadb  # Using multi-stage build for optimization
     restart: always  # Ensures the container restarts automatically if it fails
     environment:
       - MYSQL_ROOT_PASSWORD=wordpress  # Root password for MariaDB
@@ -32,7 +36,9 @@ services:
 
   # phpMyAdmin service configuration
   phpmyadmin:
-    image: phpmyadmin:latest  # Uses the latest stable phpMyAdmin image
+    build:
+      context: .
+      dockerfile: Dockerfile.phpmyadmin  # Using multi-stage build for optimization
     restart: always  # Ensures the container restarts automatically if it fails
     ports:
       - "8080:80"  # Exposes port 8080 on the host, mapped to container port 80

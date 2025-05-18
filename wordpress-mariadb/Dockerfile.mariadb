@@ -1,0 +1,31 @@
+FROM mariadb:10.11-jammy AS builder
+
+# Final optimized image
+FROM debian:12-slim
+
+# Install required dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    mariadb-server \
+    mariadb-client \
+    ca-certificates \
+    gosu \
+    pwgen \
+    tzdata \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /var/run/mysqld /var/lib/mysql \
+    && chown -R mysql:mysql /var/run/mysqld /var/lib/mysql
+
+# Copy necessary files from builder
+COPY --from=builder /usr/bin/mariadb* /usr/bin/
+COPY --from=builder /usr/bin/mysql* /usr/bin/
+COPY --from=builder /etc/mysql /etc/mysql
+COPY --from=builder /usr/local/bin/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+# Check if docker-entrypoint-initdb.d exists before copying
+RUN mkdir -p /docker-entrypoint-initdb.d
+
+VOLUME ["/var/lib/mysql"]
+
+EXPOSE 3306
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+CMD ["mariadbd"]
