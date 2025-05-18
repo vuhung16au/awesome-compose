@@ -111,17 +111,18 @@ To reduce the size of Docker images and improve deployment efficiency, this proj
 
    | Service    | Original Image                | Size   | Optimized Image              | Size       | Reduction |
    |------------|------------------------------|--------|------------------------------|------------|-----------|
-   | WordPress  | wordpress:6.4-php8.1-apache  | 1.03GB | Custom multi-stage build     | ~295MB     | ~71%      |
-   | MariaDB    | mariadb:10.11-jammy          | 491MB  | Custom multi-stage build     | ~248MB     | ~50%      |
-   | phpMyAdmin | phpmyadmin:latest            | 819MB  | Custom multi-stage build     | ~112MB     | ~86%      |
+   | WordPress  | wordpress:6.4-php8.1-apache  | 1.03GB | Custom multi-stage build     | 284MB      | ~72%      |
+   | MariaDB    | mariadb:10.9                 | 491MB  | N/A (using original image)   | 491MB      | 0%        |
+   | phpMyAdmin | phpmyadmin:latest            | 819MB  | Custom multi-stage build     | 143MB      | ~83%      |
 
 5. **Additional optimization techniques**:
    - Using Alpine as the base image for WordPress and phpMyAdmin
-   - Implementing proper multi-stage builds to reduce image sizes
+   - Implementing proper multi-stage builds for WordPress and phpMyAdmin to reduce image sizes
    - Installing only necessary packages and dependencies
-   - Removing cache and temporary files
+   - Removing cache and temporary files after installations
    - Configuring PHP-FPM and Nginx for optimized performance
    - Using echo -e for proper multi-line configuration files
+   - Keeping the original MariaDB image for stability and compatibility
 
 ## Before/After Docker Optimization
 
@@ -139,14 +140,14 @@ phpmyadmin   latest              68d7f9dc247b   3 months ago    819MB
 ### After Optimization
 
 ```console
-docker images
+docker images       
 REPOSITORY                     TAG       IMAGE ID       CREATED          SIZE
-wordpress-mariadb-mariadb      latest    78f3000704ef   18 minutes ago   745MB
-wordpress-mariadb-wordpress    latest    862c0d46083a   8 minutes ago    284MB
-wordpress-mariadb-phpmyadmin   latest    34144c805f2d   3 minutes ago    143MB
+wordpress-mariadb-phpmyadmin   latest    57f51d2fec86   40 minutes ago   143MB
+wordpress-mariadb-wordpress    latest    b4a4a62c9eeb   46 minutes ago   284MB
+mariadb                        10.9      56710811b0b9   19 months ago    491MB
 ```
 
-The overall size reduction is 1,168MB (2,340MB - 1,172MB), which represents approximately a 50% reduction in total image size across all three containers.
+The overall size reduction is 922MB (2,340MB - 1,418MB), which represents approximately a 39% reduction in total image size across all three containers, with significant savings in the WordPress and phpMyAdmin images.
 
 ## Deploy Options
 
