@@ -1,0 +1,12 @@
+resources:
+  - manifests/wordpress/deployment.yaml
+  - manifests/wordpress/service.yaml
+  - manifests/mariadb/deployment.yaml
+  - manifests/mariadb/service.yaml
+  - manifests/mariadb/pvc.yaml
+  - manifests/phpmyadmin/deployment.yaml
+  - manifests/phpmyadmin/service.yaml
+  - manifests/configmaps/wordpress-config.yaml
+  - manifests/secrets/db-credentials.yaml
+
+namespace: wordpress-kubernetes
