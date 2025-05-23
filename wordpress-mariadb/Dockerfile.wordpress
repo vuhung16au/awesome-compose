@@ -79,7 +79,7 @@ RUN sed -i 's/listen = 127.0.0.1:9000/listen = 9000/g' /etc/php82/php-fpm.d/www.
     sed -i 's/group = nobody/group = apache/g' /etc/php82/php-fpm.d/www.conf
 
 # Create entrypoint script
-RUN echo -e '#!/bin/sh\nphp-fpm82 -D\nhttpd -D FOREGROUND' > /usr/local/bin/docker-entrypoint.sh && \
+RUN echo -e '#!/bin/sh\n/tmp/create-wp-config.sh\nphp-fpm82 -D\nhttpd -D FOREGROUND' > /usr/local/bin/docker-entrypoint.sh && \
     chmod +x /usr/local/bin/docker-entrypoint.sh
 
 EXPOSE 80

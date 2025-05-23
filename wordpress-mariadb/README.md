@@ -1,95 +1,81 @@
 # WordPress with MariaDB
 
-This example defines one of the basic setups for WordPress with MariaDB as the database. More details on how this works can be found on the official [WordPress image page](https://hub.docker.com/_/wordpress).
-
+This example defines a basic setup for WordPress with MariaDB as the database. More details on how this works can be found on the official [WordPress image page](https://hub.docker.com/_/wordpress).
 
 Project structure:
-```
+
+```text
 .
 ├── compose.yaml
-├── docker-compose-local.yml
 ├── Dockerfile.wordpress
-├── Dockerfile.mariadb
 ├── Dockerfile.phpmyadmin
-└── README.md
+├── create-wp-config.sh
+├── README.md
+└── wordpress-installation.png
 ```
 
 [_compose.yaml_](compose.yaml)
+
 ```yaml
 services:
-  db:
-    # Using a more optimized MariaDB image
-    image: mariadb:10.11-jammy
-    volumes:
-      - db_data:/var/lib/mysql
-    restart: always
+  wordpress:
+    build:
+      context: .
+      dockerfile: Dockerfile.wordpress
+    ports:
+      - "80:80"
+    environment:
+      - WORDPRESS_DB_HOST=mariadb
+      - WORDPRESS_DB_USER=wordpress
+      - WORDPRESS_DB_PASSWORD=wordpress
+      - WORDPRESS_DB_NAME=wordpress
+    depends_on:
+      - mariadb
+    networks:
+      - wp_network
+  mariadb:
+    image: mariadb:10.9
     environment:
       - MYSQL_ROOT_PASSWORD=wordpress
       - MYSQL_DATABASE=wordpress
       - MYSQL_USER=wordpress
       - MYSQL_PASSWORD=wordpress
-    ...
-  wordpress:
-    image: wordpress:6.4-php8.1-alpine
-    ports:
-      - 80:80
-    restart: always
-    ...
-```
-
-When deploying this setup, docker compose maps the WordPress container port 80 to
-port 80 of the host as specified in the compose file.
-
-> ℹ️ **_INFO_**  
-> For compatibility purpose between `AMD64` and `ARM64` architecture, we use MariaDB as database.  
-> MariaDB 10.11 is compatible with both architectures and works well with WordPress as of 2023.  
-> Note: WordPress does not natively support PostgreSQL but is fully compatible with MySQL/MariaDB, which is why MariaDB was chosen as the database solution.
-
-## Local Development Configuration
-
-For local development, we provide an alternative configuration file (`docker-compose-local.yml`) that includes:
-
-1. WordPress with multi-stage build optimization
-2. MariaDB with multi-stage build optimization
-3. phpMyAdmin with multi-stage build optimization for database management
-
-[_docker-compose-local.yml_](docker-compose-local.yml)
-```yaml
-services:
-  wordpress:
-    build:
-      context: .
-      dockerfile: Dockerfile.wordpress  # Using multi-stage build for optimization
-    ports:
-      - "80:80"
-    environment:
-      - WORDPRESS_DB_HOST=mariadb
-      # ...
-  
-  mariadb:
-    build:
-      context: .
-      dockerfile: Dockerfile.mariadb  # Using multi-stage build for optimization
-    environment:
-      - MYSQL_ROOT_PASSWORD=wordpress
-      # ...
     volumes:
       - db_data:/var/lib/mysql
-  
+    networks:
+      - wp_network
   phpmyadmin:
     build:
       context: .
-      dockerfile: Dockerfile.phpmyadmin  # Using multi-stage build for optimization
+      dockerfile: Dockerfile.phpmyadmin
     ports:
       - "8080:80"
     environment:
       - PMA_HOST=mariadb
-      # ...
+      - PMA_USER=wordpress
+      - PMA_PASSWORD=wordpress
+    depends_on:
+      - mariadb
+    networks:
+      - wp_network
+volumes:
+  db_data:
+networks:
+  wp_network:
+    driver: bridge
 ```
 
-### Additional Configuration
+When deploying this setup, Docker Compose maps the WordPress container port 80 to port 80 of the host as specified in the compose file.
 
-The local development setup includes:
+> ℹ️ **_INFO_**
+>
+> For compatibility between `AMD64` and `ARM64` architecture, MariaDB is used as the database.
+> MariaDB 10.9 is compatible with both architectures and works well with WordPress as of 2025.
+> Note: WordPress does not natively support PostgreSQL but is fully compatible with MySQL/MariaDB, which is why MariaDB was chosen as the database solution.
+
+## Local Development Configuration
+
+This setup includes:
 
 - **Networks**: A custom bridge network for services to communicate using service names
 - **Volumes**: Named volume for MariaDB data persistence
@@ -102,36 +88,23 @@ The local development setup includes:
 To reduce the size of Docker images and improve deployment efficiency, this project uses:
 
 1. **Alpine-based images**: The Alpine Linux distribution is significantly smaller than Ubuntu or Debian-based images.
+2. **Specific image tags**: Instead of using `latest`, exact versions are specified.
+3. **Multi-stage builds**: Custom Dockerfiles use multi-stage builds to create minimal images with only required components.
 
-2. **Specific image tags**: Instead of using `latest` which may include unnecessary components, we specify exact versions.
+### Example image size comparison
 
-3. **Multi-stage builds**: Our custom Dockerfiles use multi-stage builds to create minimal images with only required components.
-
-4. **Image size comparison**:
-
-   | Service    | Original Image                | Size   | Optimized Image              | Size       | Reduction |
-   |------------|------------------------------|--------|------------------------------|------------|-----------|
-   | WordPress  | wordpress:6.4-php8.1-apache  | 1.03GB | Custom multi-stage build     | 284MB      | ~72%      |
-   | MariaDB    | mariadb:10.9                 | 491MB  | N/A (using original image)   | 491MB      | 0%        |
-   | phpMyAdmin | phpmyadmin:latest            | 819MB  | Custom multi-stage build     | 143MB      | ~83%      |
-
-5. **Additional optimization techniques**:
-   - Using Alpine as the base image for WordPress and phpMyAdmin
-   - Implementing proper multi-stage builds for WordPress and phpMyAdmin to reduce image sizes
-   - Installing only necessary packages and dependencies
-   - Removing cache and temporary files after installations
-   - Configuring PHP-FPM and Nginx for optimized performance
-   - Using echo -e for proper multi-line configuration files
-   - Keeping the original MariaDB image for stability and compatibility
+| Service    | Original Image                | Size   | Optimized Image              | Size       | Reduction |
+|------------|------------------------------|--------|------------------------------|------------|-----------|
+| phpMyAdmin | phpmyadmin:latest            | 819MB  | Custom multi-stage build     | 143MB      | ~83%      |
 
 ## Before/After Docker Optimization
 
-Here's a comparison of Docker images before and after our optimization process:
+Here's a comparison of Docker images before and after optimization:
 
 ### Before Optimization
 
 ```console
- TAG                 IMAGE ID       CREATED         SIZE
+TAG                 IMAGE ID       CREATED         SIZE
 mariadb      10.9                56710811b0b9   19 months ago   491MB
 wordpress    6.4-php8.1-apache   4c64df591c9a   14 months ago   1.03GB
 phpmyadmin   latest              68d7f9dc247b   3 months ago    819MB
@@ -140,7 +113,7 @@ phpmyadmin   latest              68d7f9dc247b   3 months ago    819MB
 ### After Optimization
 
 ```console
-docker images       
+docker images
 REPOSITORY                     TAG       IMAGE ID       CREATED          SIZE
 wordpress-mariadb-phpmyadmin   latest    57f51d2fec86   40 minutes ago   143MB
 wordpress-mariadb-wordpress    latest    b4a4a62c9eeb   46 minutes ago   284MB
@@ -157,24 +130,14 @@ The overall size reduction is 922MB (2,340MB - 1,418MB), which represents approx
 docker compose up -d
 ```
 
-### Optimized Local Development Deployment
-
-```bash
-docker compose -f docker-compose-local.yml up -d
-```
-
 Example output for standard deployment:
 
 ```console
-[+] Running 37/37
- ✔ wordpress Pulled                                                                                                      68.5s 
-   ✔ d9b17d6e3565 Pull complete                                                                                           0.6s 
-  ...
 [+] Running 4/4
- ✔ Network wordpress-mariadb_default        Created                                                                      0.0s 
- ✔ Volume "wordpress-mariadb_db_data"       Created                                                                      0.0s 
- ✔ Container wordpress-mariadb-wordpress-1  Started                                                                      0.6s 
- ✔ Container wordpress-mariadb-db-1         Started                                                                      0.6s 
+ ✔ Network wordpress-mariadb_wp_network        Created   0.0s
+ ✔ Container wordpress-mariadb-mariadb-1       Started   0.6s
+ ✔ Container wordpress-mariadb-wordpress-1     Started   0.3s
+ ✔ Container wordpress-mariadb-phpmyadmin-1    Started   0.3s
 ```
 
 ## Expected result
@@ -189,23 +152,21 @@ Example output:
 
 ```console
 CONTAINER ID   IMAGE                         COMMAND                  CREATED          STATUS          PORTS                NAMES
-d4feb59bab20   wordpress:6.4-php8.1-alpine   "docker-entrypoint.s…"   47 seconds ago   Up 46 seconds   0.0.0.0:80->80/tcp   wordpress-mariadb-wordpress-1
-0ff2639f74ca   mariadb:10.11-jammy           "docker-entrypoint.s…"   47 seconds ago   Up 46 seconds   3306/tcp             wordpress-mariadb-db-1
+d4feb59bab20   wordpress-mariadb-wordpress   ...                     Up 46 seconds   0.0.0.0:80->80/tcp   wordpress-mariadb-wordpress-1
+0ff2639f74ca   mariadb:10.9                  ...                     Up 46 seconds   3306/tcp             wordpress-mariadb-mariadb-1
 ```
 
-When using the optimized local development setup with multi-stage builds, the images will be custom-built with significantly reduced sizes.
+## Accessing Services
 
-### Accessing Services
-
-#### WordPress
+### WordPress
 
 Navigate to `http://localhost:80` in your web browser to access WordPress.
 
 ![Wordpress Installation](wordpress-installation.png)
 
-#### phpMyAdmin (Local Development Setup)
+### phpMyAdmin
 
-If you're using the local development setup, navigate to `http://localhost:8080` to access phpMyAdmin:
+Navigate to `http://localhost:8080` to access phpMyAdmin:
 
 - **Server**: mariadb
 - **Username**: wordpress
@@ -220,26 +181,14 @@ phpMyAdmin provides a web interface for:
 
 ### Stopping Services
 
-#### Standard Setup
-
 ```bash
 docker compose down
-```
-
-#### Local Development Setup
-
-```bash
-docker compose -f docker-compose-local.yml down
 ```
 
 To remove all WordPress data, delete the named volumes by passing the `-v` parameter:
 
 ```bash
-# For standard setup
 docker compose down -v
-
-# For local development setup
-docker compose -f docker-compose-local.yml down -v
 ```
 
 ## Configuration Optimizations
@@ -255,14 +204,12 @@ To ensure the Docker containers work properly, several configuration improvement
 ### phpMyAdmin Configuration
 
 - Added proper PHP-FPM user/group settings (`user = nginx` and `group = nginx`)
-- Improved configuration files with proper newlines using `echo -e`:
-  - `mime.types` file for proper MIME type handling
-  - `fastcgi.conf` for PHP processing
-  - `nginx.conf` for web server configuration
+- Improved configuration files with proper newlines using `echo -e`
+- Used Alpine as the base image
 
 ### MariaDB Configuration
 
-- Used Debian slim as final image for better compatibility
+- Used official MariaDB image for compatibility
 - Ensured proper volume setup for data persistence
 
 ## Troubleshooting
@@ -290,7 +237,7 @@ If you cannot access phpMyAdmin or it cannot connect to MariaDB:
 If your data disappears after restarts:
 
 1. Make sure you're not using `down -v` which removes volumes
-2. Check that volumes are properly configured in your docker-compose file
+2. Check that volumes are properly configured in your compose file
 
 ## Additional Information
 
