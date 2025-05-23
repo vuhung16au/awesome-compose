@@ -1,11 +1,44 @@
 ## WordPress with MySQL and phpMyAdmin
 This example defines a complete local development setup for WordPress with database management capabilities. The setup includes WordPress, MySQL, and phpMyAdmin services. More details on how this works can be found on the official [WordPress image page](https://hub.docker.com/_/wordpress).
 
+---
+
+## Why Are There Two Docker Compose Files?
+
+This project provides **two different Docker Compose files** for demonstration and flexibility:
+
+- **docker-compose.yml**: A full-featured setup including WordPress, MySQL, and phpMyAdmin, with explicit network and volume configuration.
+- **compose.yaml**: A minimal, modern Compose file using MariaDB (a MySQL-compatible alternative) and WordPress, with a simpler structure and no phpMyAdmin.
+
+**Reasons for having both files:**
+- **Size and complexity comparison:** See the difference between a minimal and a full-featured Compose setup.
+- **User choice:** Use either file depending on your needs—minimal stack or full stack with database management UI.
+
+---
+
+## Comparison: `docker-compose.yml` vs `compose.yaml`
+
+| Feature                | docker-compose.yml         | compose.yaml                |
+|------------------------|---------------------------|-----------------------------|
+| Database               | MySQL                     | MariaDB (MySQL-compatible)  |
+| WordPress              | Yes                       | Yes                         |
+| phpMyAdmin             | Yes                       | No                          |
+| Custom Network         | Yes                       | No (uses default)           |
+| Port Mapping           | WordPress: 80, phpMyAdmin: 8080 | WordPress: 80         |
+| Compose Syntax         | Classic, more verbose     | Modern, minimal             |
+| More Features          | Yes                       | No                          |
+| Simpler                | No                        | Yes                         |
+
+- **Use `docker-compose.yml`** if you want a full-featured local development environment with phpMyAdmin and explicit configuration.
+- **Use `compose.yaml`** if you want a minimal, modern stack and are comfortable managing the database without phpMyAdmin.
+
+---
 
 Project structure:
 ```
 .
 ├── docker-compose.yml
+├── compose.yaml
 └── README.md
 ```
 
