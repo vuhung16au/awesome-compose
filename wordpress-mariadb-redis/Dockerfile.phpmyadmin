@@ -1,0 +1,40 @@
+FROM phpmyadmin/phpmyadmin:fpm-alpine AS builder
+
+# Final stage with minimal components
+FROM alpine:3.18
+
+# Copy only required files from the builder
+COPY --from=builder /var/www/html /var/www/html
+# Create config directory if it doesn't exist
+RUN mkdir -p /etc/php82 /etc/php82/php-fpm.d /usr/local/etc
+
+# Install only the minimal runtime dependencies
+RUN apk add --no-cache \
+    php82 \
+    php82-fpm \
+    php82-mysqli \
+    php82-session \
+    php82-mbstring \
+    php82-gd \
+    php82-xml \
+    nginx
+
+# Configure nginx
+RUN mkdir -p /run/nginx /etc/nginx/conf.d
+RUN echo -e 'worker_processes auto;\nerror_log /var/log/nginx/error.log;\npid /run/nginx/nginx.pid;\nevents { worker_connections 1024; }\nhttp {\n    include /etc/nginx/mime.types;\n    server {\n        listen 80;\n        root /var/www/html;\n        index index.php;\n        location / { try_files $uri $uri/ /index.php?$args; }\n        location ~ \\.php$ {\n            fastcgi_pass 127.0.0.1:9000;\n            fastcgi_index index.php;\n            include fastcgi.conf;\n        }\n    }\n}' > /etc/nginx/nginx.conf
+
+# Create fastcgi.conf
+RUN echo -e 'fastcgi_param  SCRIPT_FILENAME    $document_root$fastcgi_script_name;\nfastcgi_param  QUERY_STRING       $query_string;\nfastcgi_param  REQUEST_METHOD     $request_method;\nfastcgi_param  CONTENT_TYPE       $content_type;\nfastcgi_param  CONTENT_LENGTH     $content_length;\nfastcgi_param  SCRIPT_NAME        $fastcgi_script_name;\nfastcgi_param  REQUEST_URI        $request_uri;\nfastcgi_param  DOCUMENT_URI       $document_uri;\nfastcgi_param  DOCUMENT_ROOT      $document_root;\nfastcgi_param  SERVER_PROTOCOL    $server_protocol;\nfastcgi_param  GATEWAY_INTERFACE  CGI/1.1;\nfastcgi_param  SERVER_SOFTWARE    nginx/$nginx_version;\nfastcgi_param  REMOTE_ADDR        $remote_addr;\nfastcgi_param  REMOTE_PORT        $remote_port;\nfastcgi_param  SERVER_ADDR        $server_addr;\nfastcgi_param  SERVER_PORT        $server_port;\nfastcgi_param  SERVER_NAME        $server_name;\nfastcgi_param  REDIRECT_STATUS    200;' > /etc/nginx/fastcgi.conf
+
+# Create mime.types file
+RUN echo -e 'types {\n    text/html                             html htm shtml;\n    text/css                              css;\n    text/xml                              xml;\n    image/gif                             gif;\n    image/jpeg                            jpeg jpg;\n    application/javascript                js;\n    application/json                      json;\n    image/png                             png;\n    image/svg+xml                         svg svgz;\n    image/webp                            webp;\n    application/pdf                       pdf;\n    application/zip                       zip;\n}' > /etc/nginx/mime.types
+
+WORKDIR /var/www/html
+
+EXPOSE 80
+
+# Create php-fpm config
+RUN echo -e '[global]\npid = /run/php-fpm.pid\n[www]\nuser = nginx\ngroup = nginx\nlisten = 127.0.0.1:9000\npm = dynamic\npm.max_children = 5\npm.start_servers = 2\npm.min_spare_servers = 1\npm.max_spare_servers = 3' > /etc/php82/php-fpm.d/www.conf
+
+# Start PHP-FPM and nginx
+CMD ["sh", "-c", "php-fpm82 -D && nginx -g 'daemon off;'"]
