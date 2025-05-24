@@ -138,7 +138,7 @@ services:
     image: oliver006/redis_exporter:latest
     environment:
       - REDIS_ADDR=redis-1:6379
-      - REDIS_PASSWORD=wordpress_redis
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
     ports:
       - "9121:9121"
     depends_on:
@@ -151,7 +151,7 @@ services:
     image: oliver006/redis_exporter:latest
     environment:
       - REDIS_ADDR=redis-2:6379
-      - REDIS_PASSWORD=wordpress_redis
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
     ports:
       - "9122:9121"
     depends_on:

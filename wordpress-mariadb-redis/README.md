@@ -56,7 +56,7 @@ docker compose up -d
 - WordPress: https://localhost/
 - phpMyAdmin: http://localhost:8080 (user: wordpress, password: wordpress)
 
-> **Default passwords and environment variables can be found in the `dotevn-sample` file.**
+> **Default passwords and environment variables can be found in the `dotevn-sample` or `.env` file.**
 
 ## Documentation
 

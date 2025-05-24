@@ -41,10 +41,10 @@ The WordPress containers are built using a custom Dockerfile (`Dockerfile.wordpr
 |----------|-------------|---------------|
 | WORDPRESS_DB_HOST | Database hostname | mariadb |
 | WORDPRESS_DB_USER | Database username | wordpress |
-| WORDPRESS_DB_PASSWORD | Database password | wordpress |
+| WORDPRESS_DB_PASSWORD | Database password | (see .env) |
 | WORDPRESS_DB_NAME | Database name | wordpress |
 | WORDPRESS_REDIS_HOST | Redis hostname | redis-1 or redis-2 |
-| WORDPRESS_REDIS_PASSWORD | Redis password | wordpress_redis |
+| WORDPRESS_REDIS_PASSWORD | Redis password | (see .env) |
 
 ## phpMyAdmin Configuration
 
@@ -61,7 +61,7 @@ phpMyAdmin is built using a custom Dockerfile (`Dockerfile.phpmyadmin`) with sev
 |----------|-------------|---------------|
 | PMA_HOST | Database hostname | mariadb |
 | PMA_USER | Database username | wordpress |
-| PMA_PASSWORD | Database password | wordpress |
+| PMA_PASSWORD | Database password | (see .env) |
 
 ## MariaDB Configuration
 
@@ -74,10 +74,10 @@ The MariaDB container uses the official MariaDB image with these configurations:
 
 | Variable | Description | Default Value |
 |----------|-------------|---------------|
-| MYSQL_ROOT_PASSWORD | Root password | wordpress |
+| MYSQL_ROOT_PASSWORD | Root password | (see .env) |
 | MYSQL_DATABASE | Database name | wordpress |
 | MYSQL_USER | Database user | wordpress |
-| MYSQL_PASSWORD | Database password | wordpress |
+| MYSQL_PASSWORD | Database password | (see .env) |
 
 ## Redis Configuration
 
@@ -93,7 +93,7 @@ The Redis containers use the official Redis Alpine-based image with several opti
 ### Redis Command Arguments
 
 ```
-redis-server --requirepass wordpress_redis
+redis-server --requirepass $REDIS_PASSWORD
 ```
 
 For enhanced production configurations, consider adding:

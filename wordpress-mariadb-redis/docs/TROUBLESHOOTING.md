@@ -209,7 +209,7 @@ If you cannot access Prometheus or Grafana:
 
 The configuration provided is intended for local development only. For production environments:
 
-- Use strong, unique passwords
+- Use strong, unique passwords (see `.env` for current values)
 - Consider using Docker secrets for sensitive information
 - Implement proper network segmentation
 - Enable SSL/TLS for secure connections

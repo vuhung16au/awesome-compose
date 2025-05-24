@@ -1,4 +1,3 @@
-
 # Step 10: Enterprise-Readiness Review (Performance, Security, Architecture)
 
 ## 1. Performance
@@ -11,7 +10,7 @@
 - Add Docker healthchecks to all critical services.
 
 ## 2. Security
-- Do not hardcode passwords in compose.yaml. Use Docker secrets or environment files for sensitive data.
+- Do not hardcode passwords in compose.yaml. Use Docker secrets or environment files for sensitive data (see `.env`).
 - Restrict service-to-service communication using multiple networks or network aliases. Only expose necessary ports.
 - Use real SSL certificates (not self-signed) for NGINX in production. Automate renewal (e.g., Let's Encrypt).
 - Run containers as non-root users where possible. Drop unnecessary Linux capabilities.
