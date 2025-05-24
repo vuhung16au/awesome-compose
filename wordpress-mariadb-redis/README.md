@@ -41,7 +41,7 @@ services:
     networks:
       - wp_network
   mariadb:
-    image: mariadb:10.9
+    image: mariadb:10
     environment:
       - MYSQL_ROOT_PASSWORD=wordpress
       - MYSQL_DATABASE=wordpress
@@ -52,9 +52,11 @@ services:
     networks:
       - wp_network
   redis:
-    image: redis:8.0-alpine
+    image: redis:7.2-alpine
     restart: always
     command: ["redis-server", "--requirepass", "wordpress_redis"]
+    ports:
+      - "6379:6379"
     volumes:
       - redis_data:/data
     networks:
@@ -86,7 +88,7 @@ When deploying this setup, Docker Compose maps the WordPress container port 80 t
 > ℹ️ **_INFO_**
 >
 > For compatibility between `AMD64` and `ARM64` architecture, MariaDB is used as the database.
-> MariaDB 10.9 is compatible with both architectures and works well with WordPress as of 2025.
+> MariaDB 10 is compatible with both architectures and works well with WordPress as of 2025.
 > Note: WordPress does not natively support PostgreSQL but is fully compatible with MySQL/MariaDB, which is why MariaDB was chosen as the database solution.
 
 ## Local Development Configuration
@@ -113,7 +115,7 @@ To reduce the size of Docker images and improve deployment efficiency, this proj
 | Service    | Original Image                | Size   | Optimized Image              | Size       | Reduction |
 |------------|------------------------------|--------|------------------------------|------------|-----------|
 | phpMyAdmin | phpmyadmin:latest            | 819MB  | Custom multi-stage build     | 143MB      | ~83%      |
-| Redis      | redis:latest                 | 117MB  | redis:8.0-alpine             | 36MB       | ~70%      |
+| Redis      | redis:latest                 | 117MB  | redis:7.2-alpine             | 36MB       | ~70%      |
 
 ## Before/After Docker Optimization
 
@@ -123,7 +125,7 @@ Here's a comparison of Docker images before and after optimization:
 
 ```console
 TAG                 IMAGE ID       CREATED         SIZE
-mariadb      10.9                56710811b0b9   19 months ago   491MB
+mariadb      10                  56710811b0b9   19 months ago   491MB
 wordpress    6.4-php8.1-apache   4c64df591c9a   14 months ago   1.03GB
 phpmyadmin   latest              68d7f9dc247b   3 months ago    819MB
 redis        latest              3c1b5271fdf5   2 months ago    117MB
@@ -136,11 +138,11 @@ docker images
 REPOSITORY                          TAG       IMAGE ID       CREATED          SIZE
 wordpress-mariadb-redis-phpmyadmin  latest    57f51d2fec86   40 minutes ago   143MB
 wordpress-mariadb-redis-wordpress   latest    b4a4a62c9eeb   46 minutes ago   284MB
-mariadb                             10.9      56710811b0b9   19 months ago    491MB
-redis                               8.0-alpine 2e3198c7a02c   2 months ago     36MB
+mariadb                             10        56710811b0b9   19 months ago    491MB
+redis                               7.2-alpine 2e3198c7a02c   2 months ago     36MB
 ```
 
-The overall size reduction is 922MB (2,457MB - 1,535MB), which represents approximately a 38% reduction in total image size across all containers, with significant savings in the WordPress and phpMyAdmin images. For Redis, we use the Alpine-based image (redis:8.0-alpine) which is significantly smaller than the standard image.
+The overall size reduction is 922MB (2,457MB - 1,535MB), which represents approximately a 38% reduction in total image size across all containers, with significant savings in the WordPress and phpMyAdmin images. For Redis, we use the Alpine-based image (redis:7.2-alpine) which is significantly smaller than the standard image.
 
 ## Deploy Options
 
@@ -174,8 +176,8 @@ Example output:
 ```console
 CONTAINER ID   IMAGE                              COMMAND                  CREATED          STATUS          PORTS                NAMES
 d4feb59bab20   wordpress-mariadb-redis-wordpress  ...                     Up 46 seconds   0.0.0.0:80->80/tcp   wordpress-mariadb-redis-wordpress-1
-0ff2639f74ca   mariadb:10.9                       ...                     Up 46 seconds   3306/tcp             wordpress-mariadb-redis-mariadb-1
-e7c1c45e1f9a   redis:8.0-alpine                  ...                     Up 46 seconds   6379/tcp             wordpress-mariadb-redis-redis-1
+0ff2639f74ca   mariadb:10                         ...                     Up 46 seconds   3306/tcp             wordpress-mariadb-redis-mariadb-1
+e7c1c45e1f9a   redis:7.2-alpine                  ...                     Up 46 seconds   6379/tcp             wordpress-mariadb-redis-redis-1
 8ad2f721be3c   wordpress-mariadb-redis-phpmyadmin ...                     Up 46 seconds   0.0.0.0:8080->80/tcp  wordpress-mariadb-redis-phpmyadmin-1
 ```
 
@@ -234,7 +236,7 @@ To ensure the Docker containers work properly, several configuration improvement
 
 - Fixed entrypoint script in `Dockerfile.wordpress` with proper newline handling using `echo -e`
 - Optimized Apache and PHP-FPM configuration for better performance
-- Used Alpine as base image to reduce overall size
+- Used Alpine as base image with PHP 8.2 to reduce overall size
 - Installed PHP Redis extension for object caching
 - Included Redis Object Cache plugin for WordPress
 
@@ -251,7 +253,7 @@ To ensure the Docker containers work properly, several configuration improvement
 
 ### Redis Configuration
 
-- Used official Redis Alpine-based image (8.0-alpine) for reduced size and optimized performance
+- Used official Redis Alpine-based image (7.2-alpine) for reduced size and optimized performance
 - Configured password authentication for security
 - Set up volume for data persistence
 - Integrated with WordPress via environment variables
@@ -380,7 +382,7 @@ For WordPress sites expecting heavy traffic, the following enhancements can be i
 1. **Enhanced Redis Configuration**
    ```yaml
    redis:
-     image: redis:8.0-alpine
+     image: redis:7.2-alpine
      command: ["redis-server", "--requirepass", "wordpress_redis", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
    ```
 

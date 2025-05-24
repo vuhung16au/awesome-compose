@@ -49,7 +49,7 @@ fi
 
 # Test MariaDB connection
 echo -e "\n${YELLOW}Testing MariaDB connection from WordPress container...${NC}"
-DB_TEST=$(docker exec wordpress-mariadb-redis-wordpress-1 sh -c "php -r '\$conn = new mysqli(\"mariadb\", \"wordpress\", \"wordpress\", \"wordpress\"); echo \$conn->connect_error ? \"ERROR: \" . \$conn->connect_error : \"SUCCESS: Connected to MariaDB\";'")
+DB_TEST=$(docker exec wordpress-mariadb-redis-wordpress-1 sh -c "php82 -r '\$conn = new mysqli(\"mariadb\", \"wordpress\", \"wordpress\", \"wordpress\"); echo \$conn->connect_error ? \"ERROR: \" . \$conn->connect_error : \"SUCCESS: Connected to MariaDB\";'")
 echo -e "${GREEN}$DB_TEST${NC}"
 
 # Test Redis connection
