@@ -1,25 +1,83 @@
 # Services configuration
 services:
-  # WordPress service configuration
-  wordpress:
+  # NGINX reverse proxy service
+  nginx:
+    image: nginx:stable-alpine
+    ports:
+      - "80:80"  # Exposes port 80 on the host, mapped to container port 80
+      - "443:443"  # For HTTPS
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro  # For SSL certificates
+    depends_on:
+      - wordpress-1
+      - wordpress-2
+      - wordpress-3
+    networks:
+      - wp_network
+    restart: always  # Ensures the container restarts automatically if it fails
+
+  # WordPress service configurations (3 instances)
+  wordpress-1:
     build:
       context: .
       dockerfile: Dockerfile.wordpress  # Using multi-stage build for optimization
-    ports:
-      - "80:80"  # Exposes port 80 on the host, mapped to container port 80
     restart: always  # Ensures the container restarts automatically if it fails
     environment:
       - WORDPRESS_DB_HOST=mariadb  # Points to the database service by its name
       - WORDPRESS_DB_USER=wordpress  # Database user for WordPress
       - WORDPRESS_DB_PASSWORD=wordpress  # Database password for WordPress user
       - WORDPRESS_DB_NAME=wordpress  # Name of the database WordPress will use
-      - WORDPRESS_REDIS_HOST=redis  # Points to the Redis service
+      - WORDPRESS_REDIS_HOST=redis-1  # Points to the first Redis service
       - WORDPRESS_REDIS_PASSWORD=wordpress_redis  # Redis password
+    volumes:
+      - wordpress_uploads:/var/www/html/wp-content/uploads  # Shared uploads directory
     depends_on:
       - mariadb  # Ensures the WordPress container starts after the MariaDB container
-      - redis    # Ensures the WordPress container starts after the Redis container
+      - redis-1    # Ensures the WordPress container starts after the Redis container
     networks:
       - wp_network  # Connects to the defined network
+
+  wordpress-2:
+    build:
+      context: .
+      dockerfile: Dockerfile.wordpress
+    restart: always
+    environment:
+      - WORDPRESS_DB_HOST=mariadb
+      - WORDPRESS_DB_USER=wordpress
+      - WORDPRESS_DB_PASSWORD=wordpress
+      - WORDPRESS_DB_NAME=wordpress
+      - WORDPRESS_REDIS_HOST=redis-2
+      - WORDPRESS_REDIS_PASSWORD=wordpress_redis
+    volumes:
+      - wordpress_uploads:/var/www/html/wp-content/uploads  # Shared uploads directory
+    depends_on:
+      - mariadb
+      - redis-2
+    networks:
+      - wp_network
+
+  wordpress-3:
+    build:
+      context: .
+      dockerfile: Dockerfile.wordpress
+    restart: always
+    environment:
+      - WORDPRESS_DB_HOST=mariadb
+      - WORDPRESS_DB_USER=wordpress
+      - WORDPRESS_DB_PASSWORD=wordpress
+      - WORDPRESS_DB_NAME=wordpress
+      - WORDPRESS_REDIS_HOST=redis-1
+      - WORDPRESS_REDIS_PASSWORD=wordpress_redis
+    volumes:
+      - wordpress_uploads:/var/www/html/wp-content/uploads  # Shared uploads directory
+    depends_on:
+      - mariadb
+      - redis-1
+    networks:
+      - wp_network
 
   # MariaDB service configuration
   mariadb:
@@ -35,15 +93,26 @@ services:
     networks:
       - wp_network  # Connects to the defined network
 
-  # Redis service configuration
-  redis:
+  # Redis service configurations
+  redis-1:
     image: redis:7.2-alpine  # Using Alpine-based Redis 7.2 for smaller image size
     restart: always  # Ensures the container restarts automatically if it fails
     command: ["redis-server", "--requirepass", "wordpress_redis"]  # Set Redis password
     ports:
       - "6379:6379"  # Expose Redis port (optional, for external access)
     volumes:
-      - redis_data:/data  # Persists Redis data using a named volume
+      - redis_data_1:/data  # Persists Redis data using a named volume
+    networks:
+      - wp_network  # Connects to the defined network
+      
+  redis-2:
+    image: redis:7.2-alpine  # Using Alpine-based Redis 7.2 for smaller image size
+    restart: always  # Ensures the container restarts automatically if it fails
+    command: ["redis-server", "--requirepass", "wordpress_redis"]  # Set Redis password
+    ports:
+      - "6380:6379"  # Expose Redis port on a different host port
+    volumes:
+      - redis_data_2:/data  # Persists Redis data using a named volume
     networks:
       - wp_network  # Connects to the defined network
 
@@ -68,8 +137,12 @@ services:
 volumes:
   db_data:  # Named volume for persisting MariaDB data across container restarts
     # No additional configuration needed for a simple local volume
-  redis_data:  # Named volume for persisting Redis data across container restarts
+  redis_data_1:  # Named volume for persisting Redis-1 data across container restarts
     # No additional configuration needed for a simple local volume
+  redis_data_2:  # Named volume for persisting Redis-2 data across container restarts
+    # No additional configuration needed for a simple local volume
+  wordpress_uploads:  # Shared volume for WordPress uploads
+    driver: local  # Using local driver for development (use NFS or cloud storage in production)
 
 # Networks configuration
 networks:
