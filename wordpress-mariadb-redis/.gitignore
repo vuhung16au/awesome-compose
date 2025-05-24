@@ -1,0 +1,32 @@
+# Ignore environment files
+.env
+
+# Ignore SSL certificates and keys
+ginx/ssl/cert.pem
+nginx/ssl/key.pem
+
+# Ignore logs and temporary files
+*.log
+*.tmp
+
+# Ignore Docker-related files
+*.pid
+
+# Ignore OS generated files
+.DS_Store
+Thumbs.db
+
+# Ignore backup files
+*~
+
+# Ignore test output
+wordpress-installation.png
+
+# Ignore node_modules if any
+node_modules/
+
+# Ignore Python cache if any
+__pycache__/
+
+# Ignore VSCode settings
+.vscode/

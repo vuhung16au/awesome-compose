@@ -35,6 +35,9 @@ This example defines a setup for WordPress with MariaDB as the database and Redi
 ## Quick Start
 
 ```bash
+# Copy the sample environment file and rename it to .env
+cp dotevn-sample .env
+
 # Start the stack with 3 WordPress instances and 2 Redis instances
 docker compose up -d
 ```
@@ -52,6 +55,8 @@ docker compose up -d
 
 - WordPress: https://localhost/
 - phpMyAdmin: http://localhost:8080 (user: wordpress, password: wordpress)
+
+> **Default passwords and environment variables can be found in the `dotevn-sample` file.**
 
 ## Documentation
 

@@ -25,12 +25,12 @@ services:
       dockerfile: Dockerfile.wordpress  # Using multi-stage build for optimization
     restart: always  # Ensures the container restarts automatically if it fails
     environment:
-      - WORDPRESS_DB_HOST=mariadb  # Points to the database service by its name
-      - WORDPRESS_DB_USER=wordpress  # Database user for WordPress
-      - WORDPRESS_DB_PASSWORD=wordpress  # Database password for WordPress user
-      - WORDPRESS_DB_NAME=wordpress  # Name of the database WordPress will use
-      - WORDPRESS_REDIS_HOST=redis-1  # Points to the first Redis service
-      - WORDPRESS_REDIS_PASSWORD=wordpress_redis  # Redis password
+      - WORDPRESS_DB_HOST=${WORDPRESS_DB_HOST}
+      - WORDPRESS_DB_USER=${WORDPRESS_DB_USER}
+      - WORDPRESS_DB_PASSWORD=${WORDPRESS_DB_PASSWORD}
+      - WORDPRESS_DB_NAME=${WORDPRESS_DB_NAME}
+      - WORDPRESS_REDIS_HOST=${WORDPRESS_REDIS_HOST}
+      - WORDPRESS_REDIS_PASSWORD=${WORDPRESS_REDIS_PASSWORD}
     volumes:
       - wordpress_uploads:/var/www/html/wp-content/uploads  # Shared uploads directory
     depends_on:
@@ -45,12 +45,12 @@ services:
       dockerfile: Dockerfile.wordpress
     restart: always
     environment:
-      - WORDPRESS_DB_HOST=mariadb
-      - WORDPRESS_DB_USER=wordpress
-      - WORDPRESS_DB_PASSWORD=wordpress
-      - WORDPRESS_DB_NAME=wordpress
+      - WORDPRESS_DB_HOST=${WORDPRESS_DB_HOST}
+      - WORDPRESS_DB_USER=${WORDPRESS_DB_USER}
+      - WORDPRESS_DB_PASSWORD=${WORDPRESS_DB_PASSWORD}
+      - WORDPRESS_DB_NAME=${WORDPRESS_DB_NAME}
       - WORDPRESS_REDIS_HOST=redis-2
-      - WORDPRESS_REDIS_PASSWORD=wordpress_redis
+      - WORDPRESS_REDIS_PASSWORD=${WORDPRESS_REDIS_PASSWORD}
     volumes:
       - wordpress_uploads:/var/www/html/wp-content/uploads  # Shared uploads directory
     depends_on:
@@ -65,12 +65,12 @@ services:
       dockerfile: Dockerfile.wordpress
     restart: always
     environment:
-      - WORDPRESS_DB_HOST=mariadb
-      - WORDPRESS_DB_USER=wordpress
-      - WORDPRESS_DB_PASSWORD=wordpress
-      - WORDPRESS_DB_NAME=wordpress
+      - WORDPRESS_DB_HOST=${WORDPRESS_DB_HOST}
+      - WORDPRESS_DB_USER=${WORDPRESS_DB_USER}
+      - WORDPRESS_DB_PASSWORD=${WORDPRESS_DB_PASSWORD}
+      - WORDPRESS_DB_NAME=${WORDPRESS_DB_NAME}
       - WORDPRESS_REDIS_HOST=redis-1
-      - WORDPRESS_REDIS_PASSWORD=wordpress_redis
+      - WORDPRESS_REDIS_PASSWORD=${WORDPRESS_REDIS_PASSWORD}
     volumes:
       - wordpress_uploads:/var/www/html/wp-content/uploads  # Shared uploads directory
     depends_on:
@@ -84,10 +84,10 @@ services:
     image: mariadb:10  # Using official MariaDB 10 image
     restart: always  # Ensures the container restarts automatically if it fails
     environment:
-      - MYSQL_ROOT_PASSWORD=wordpress  # Root password for MariaDB
-      - MYSQL_DATABASE=wordpress  # Creates a database named 'wordpress'
-      - MYSQL_USER=wordpress  # Creates a user named 'wordpress'
-      - MYSQL_PASSWORD=wordpress  # Sets password for the 'wordpress' user
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     volumes:
       - db_data:/var/lib/mysql  # Persists the database data using a named volume
     networks:
@@ -97,7 +97,7 @@ services:
   redis-1:
     image: redis:7.2-alpine  # Using Alpine-based Redis 7.2 for smaller image size
     restart: always  # Ensures the container restarts automatically if it fails
-    command: ["redis-server", "--requirepass", "wordpress_redis"]  # Set Redis password
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]  # Set Redis password
     ports:
       - "6379:6379"  # Expose Redis port (optional, for external access)
     volumes:
@@ -108,7 +108,7 @@ services:
   redis-2:
     image: redis:7.2-alpine  # Using Alpine-based Redis 7.2 for smaller image size
     restart: always  # Ensures the container restarts automatically if it fails
-    command: ["redis-server", "--requirepass", "wordpress_redis"]  # Set Redis password
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]  # Set Redis password
     ports:
       - "6380:6379"  # Expose Redis port on a different host port
     volumes:
@@ -125,9 +125,9 @@ services:
     ports:
       - "8080:80"  # Exposes port 8080 on the host, mapped to container port 80
     environment:
-      - PMA_HOST=mariadb  # Points to the MariaDB service by its name
-      - PMA_USER=wordpress  # Same as WordPress database user
-      - PMA_PASSWORD=wordpress  # Same as WordPress database password
+      - PMA_HOST=${PMA_HOST}
+      - PMA_USER=${PMA_USER}
+      - PMA_PASSWORD=${PMA_PASSWORD}
     depends_on:
       - mariadb  # Ensures phpMyAdmin starts after the MariaDB container
     networks:

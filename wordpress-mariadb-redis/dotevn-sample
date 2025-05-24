@@ -1,0 +1,23 @@
+# Environment variables for Docker Compose secrets
+
+# MariaDB
+MYSQL_ROOT_PASSWORD=wordpress
+MYSQL_DATABASE=wordpress
+MYSQL_USER=wordpress
+MYSQL_PASSWORD=wordpress
+
+# WordPress
+WORDPRESS_DB_HOST=mariadb
+WORDPRESS_DB_USER=wordpress
+WORDPRESS_DB_PASSWORD=wordpress
+WORDPRESS_DB_NAME=wordpress
+WORDPRESS_REDIS_HOST=redis-1
+WORDPRESS_REDIS_PASSWORD=wordpress_redis
+
+# phpMyAdmin
+PMA_HOST=mariadb
+PMA_USER=wordpress
+PMA_PASSWORD=wordpress
+
+# Redis
+REDIS_PASSWORD=wordpress_redis
