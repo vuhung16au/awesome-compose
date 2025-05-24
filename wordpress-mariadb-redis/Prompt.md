@@ -1,3 +1,68 @@
+# Step 9
+
+Implement monitoring 
+- Use Prometheus and Grafana to monitor the Docker Compose setup.
+
+# Step 8 
+
+- Use Docker Gordon to create a topology diagram of the Docker Compose setup.
+- Draw with mermaid syntax to visualize the architecture.
+
+Prompt:
+```
+show my network topology, including names, ip, services and relationships
+```
+
+Output 
+
+```
+Here is your network topology including container names, IP addresses, services, and their relationships within the Docker networks:
+
+1. Network: bridge (default)
+   - No containers currently connected.
+
+2. Network: host
+   - Containers (mostly Kubernetes pods) with no specific IP addresses assigned here:
+     - kube-proxy-4z9pw (kube-system)
+     - etcd-docker-desktop (kube-system)
+     - kube-scheduler-docker-desktop (kube-system)
+     - kube-controller-manager-docker-desktop (kube-system)
+     - kube-apiserver-docker-desktop (kube-system)
+
+3. Network: none
+   - Containers (Kubernetes pods) with no IP addresses:
+     - coredns-668d6bf9bc-2rrff (kube-system)
+     - storage-provisioner (kube-system)
+     - vpnkit-controller (kube-system)
+     - coredns-668d6bf9bc-dzwzd (kube-system)
+
+4. Network: wordpress-mariadb-redis_wp_network
+   - Subnet: 172.18.0.0/16, Gateway: 172.18.0.1
+   - Containers and their IPs:
+     - redis-1-1: 172.18.0.3 (Redis service)
+     - redis-2-1: 172.18.0.2 (Redis service)
+     - redis-exporter-2-1: 172.18.0.6 (Redis metrics exporter)
+     - redis-exporter-1-1: 172.18.0.5 (Redis metrics exporter)
+     - nginx-exporter-1: 172.18.0.12 (Nginx metrics exporter)
+     - grafana-1: 172.18.0.14 (Grafana monitoring)
+     - wordpress-3-1: 172.18.0.10 (WordPress service)
+     - wordpress-2-1: 172.18.0.8 (WordPress service)
+     - wordpress-1-1: 172.18.0.11 (WordPress service)
+     - nginx-1: 172.18.0.7 (Nginx web server)
+     - mariadb-1: 172.18.0.4 (MariaDB database)
+     - phpmyadmin-1: 172.18.0.9 (phpMyAdmin for DB management)
+     - prometheus-1: 172.18.0.13 (Prometheus monitoring)
+
+Relationships:
+- WordPress containers connect to MariaDB (172.18.0.4) for database services.
+- Redis containers provide caching services.
+- Nginx acts as a web server/load balancer for WordPress.
+- Prometheus and Grafana provide monitoring and metrics visualization.
+- Exporters (redis-exporter, nginx-exporter) expose metrics to Prometheus.
+
+If you want, I can provide a visual diagram or more detailed service descriptions.
+```
+
 # Step 1
 
 Generate a Docker Compose YAML file that sets up three services:
@@ -41,3 +106,4 @@ docker-compose.local.yml
 # Step 7
 
 Update README.md to describe Additional Configuration and services
+

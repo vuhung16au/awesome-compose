@@ -133,6 +133,85 @@ services:
     networks:
       - wp_network  # Connects to the defined network
 
+  # Redis Exporter for redis-1
+  redis-exporter-1:
+    image: oliver006/redis_exporter:latest
+    environment:
+      - REDIS_ADDR=redis-1:6379
+      - REDIS_PASSWORD=wordpress_redis
+    ports:
+      - "9121:9121"
+    depends_on:
+      - redis-1
+    networks:
+      - wp_network
+
+  # Redis Exporter for redis-2
+  redis-exporter-2:
+    image: oliver006/redis_exporter:latest
+    environment:
+      - REDIS_ADDR=redis-2:6379
+      - REDIS_PASSWORD=wordpress_redis
+    ports:
+      - "9122:9121"
+    depends_on:
+      - redis-2
+    networks:
+      - wp_network
+
+  # MariaDB Exporter
+  mariadb-exporter:
+    image: prom/mysqld-exporter:latest
+    environment:
+      - DATA_SOURCE_NAME=wordpress:wordpress@(mariadb:3306)/
+    ports:
+      - "9104:9104"
+    depends_on:
+      - mariadb
+    networks:
+      - wp_network
+
+  # NGINX Exporter
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:latest
+    command:
+      - -nginx.scrape-uri=http://nginx:80/stub_status
+    ports:
+      - "9113:9113"
+    depends_on:
+      - nginx
+    networks:
+      - wp_network
+
+  # Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      - redis-exporter-1
+      - redis-exporter-2
+      - mariadb-exporter
+      - nginx-exporter
+    networks:
+      - wp_network
+
+  # Grafana
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - wp_network
+
 # Volumes configuration
 volumes:
   db_data:  # Named volume for persisting MariaDB data across container restarts
@@ -143,6 +222,8 @@ volumes:
     # No additional configuration needed for a simple local volume
   wordpress_uploads:  # Shared volume for WordPress uploads
     driver: local  # Using local driver for development (use NFS or cloud storage in production)
+  grafana_data:  # Named volume for persisting Grafana data across container restarts
+    # No additional configuration needed for a simple local volume
 
 # Networks configuration
 networks:

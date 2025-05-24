@@ -149,6 +149,33 @@ else
   echo -e "${RED}phpMyAdmin is not accessible. Got HTTP $PMA_RESPONSE${NC}"
 fi
 
+# Test Grafana service
+echo -e "\n${YELLOW}Testing Grafana service...${NC}"
+GRAFANA_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/login)
+if [ "$GRAFANA_RESPONSE" == "200" ]; then
+  echo -e "${GREEN}Grafana is accessible at http://localhost:3000 (HTTP $GRAFANA_RESPONSE)${NC}"
+else
+  echo -e "${RED}Grafana is not accessible. Got HTTP $GRAFANA_RESPONSE${NC}"
+fi
+
+# Test Prometheus service
+echo -e "\n${YELLOW}Testing Prometheus service...${NC}"
+PROM_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:9090/-/ready)
+if [ "$PROM_RESPONSE" == "200" ]; then
+  echo -e "${GREEN}Prometheus is accessible at http://localhost:9090 (HTTP $PROM_RESPONSE)${NC}"
+else
+  echo -e "${RED}Prometheus is not accessible. Got HTTP $PROM_RESPONSE${NC}"
+fi
+
+# Test Prometheus targets
+echo -e "\n${YELLOW}Checking Prometheus targets...${NC}"
+PROM_TARGETS=$(curl -s http://localhost:9090/api/v1/targets | grep -E '"health":"up"')
+if [ -n "$PROM_TARGETS" ]; then
+  echo -e "${GREEN}Prometheus is scraping targets successfully${NC}"
+else
+  echo -e "${RED}Prometheus is NOT scraping any targets or targets are down${NC}"
+fi
+
 # Test MariaDB connection from all WordPress containers
 echo -e "\n${YELLOW}Testing MariaDB connections from WordPress containers...${NC}"
 
