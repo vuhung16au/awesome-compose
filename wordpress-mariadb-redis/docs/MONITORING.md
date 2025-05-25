@@ -1,6 +1,6 @@
 # Monitoring and Observability
 
-This project includes a robust monitoring stack using Prometheus and Grafana, along with exporters for Redis, MariaDB, and NGINX. This setup provides real-time metrics, dashboards, and observability for all major services in the WordPress-MariaDB-Redis environment.
+This project includes a robust monitoring stack using Prometheus and Grafana, along with exporters for Redis, MariaDB, and NGINX. This setup provides real-time metrics, dashboards, and observability for all major services in the WordPress-MariaDB-Redis environment. Additionally, Docker healthchecks have been implemented for all services to ensure automatic recovery from failures.
 
 ## Components
 
@@ -33,6 +33,33 @@ This project includes a robust monitoring stack using Prometheus and Grafana, al
 - Add more exporters for other services as needed.
 - Customize Prometheus scrape intervals and targets in `prometheus/prometheus.yml`.
 - Build your own Grafana dashboards for deeper insights.
+
+## Docker Healthchecks
+
+All services in this stack include Docker healthchecks that:
+
+- Monitor the health of each container
+- Automatically restart containers when they become unhealthy
+- Provide visibility into container health via `docker ps` or Docker Desktop
+
+| Service | Health Check Method | Check Interval | Retries | Start Period |
+|---------|---------------------|----------------|---------|--------------|
+| NGINX | HTTP request to port 80 | 30s | 3 | 15s |
+| WordPress | HTTP request to web server | 1m | 3 | 30s |
+| MariaDB | `mysqladmin ping` command | 30s | 5 | 30s |
+| Redis | `redis-cli ping` command | 30s | 3 | 15s |
+| phpMyAdmin | HTTP request to port 80 | 30s | 3 | 15s |
+| Prometheus | HTTP health endpoint | 30s | 3 | 15s |
+| Grafana | API health endpoint | 30s | 3 | 15s |
+| Exporters | HTTP metrics endpoint | 30s | 3 | 15s |
+
+### Viewing Health Status
+
+```bash
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Health}}"
+```
+
+This will show all containers with their health status (healthy, unhealthy, or starting).
 
 ---
 

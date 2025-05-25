@@ -10,7 +10,6 @@
 - Add Docker healthchecks to all critical services.
 
 ## 2. Security
-- Do not hardcode passwords in compose.yaml. Use Docker secrets or environment files for sensitive data (see `.env`).
 - Restrict service-to-service communication using multiple networks or network aliases. Only expose necessary ports.
 - Use real SSL certificates (not self-signed) for NGINX in production. Automate renewal (e.g., Let's Encrypt).
 - Run containers as non-root users where possible. Drop unnecessary Linux capabilities.
@@ -28,7 +27,7 @@
 ## Actionable Next Steps
 
 1. Implement Docker healthchecks for all services.
-2. Move secrets to Docker secrets or .env files (never commit secrets).
+2. ~~Move secrets to Docker secrets or .env files (never commit secrets)~~. DONE.
 3. Use production storage drivers for volumes.
 4. Restrict phpMyAdmin and monitoring UIs to trusted IPs.
 5. Automate SSL certificate renewal.

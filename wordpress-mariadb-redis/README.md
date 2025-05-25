@@ -50,6 +50,7 @@ docker compose up -d
 - NGINX with reverse proxy and load balancing
 - phpMyAdmin for database management
 - HTTPS support with self-signed certificates
+- Health checks for all services to ensure automatic restarts
 
 ## Accessing Services
 

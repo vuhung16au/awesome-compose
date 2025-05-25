@@ -17,6 +17,12 @@ services:
     networks:
       - wp_network
     restart: always  # Ensures the container restarts automatically if it fails
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
   # WordPress service configurations (3 instances)
   wordpress-1:
@@ -38,6 +44,12 @@ services:
       - redis-1    # Ensures the WordPress container starts after the Redis container
     networks:
       - wp_network  # Connects to the defined network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   wordpress-2:
     build:
@@ -58,6 +70,12 @@ services:
       - redis-2
     networks:
       - wp_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   wordpress-3:
     build:
@@ -78,6 +96,12 @@ services:
       - redis-1
     networks:
       - wp_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   # MariaDB service configuration
   mariadb:
@@ -92,6 +116,12 @@ services:
       - db_data:/var/lib/mysql  # Persists the database data using a named volume
     networks:
       - wp_network  # Connects to the defined network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
   # Redis service configurations
   redis-1:
@@ -104,6 +134,12 @@ services:
       - redis_data_1:/data  # Persists Redis data using a named volume
     networks:
       - wp_network  # Connects to the defined network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
       
   redis-2:
     image: redis:7.2-alpine  # Using Alpine-based Redis 7.2 for smaller image size
@@ -115,6 +151,12 @@ services:
       - redis_data_2:/data  # Persists Redis data using a named volume
     networks:
       - wp_network  # Connects to the defined network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
   # phpMyAdmin service configuration
   phpmyadmin:
@@ -132,6 +174,12 @@ services:
       - mariadb  # Ensures phpMyAdmin starts after the MariaDB container
     networks:
       - wp_network  # Connects to the defined network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
   # Redis Exporter for redis-1
   redis-exporter-1:
@@ -145,6 +193,12 @@ services:
       - redis-1
     networks:
       - wp_network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9121/metrics"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
   # Redis Exporter for redis-2
   redis-exporter-2:
@@ -158,6 +212,12 @@ services:
       - redis-2
     networks:
       - wp_network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9121/metrics"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
   # MariaDB Exporter
   mariadb-exporter:
@@ -170,6 +230,12 @@ services:
       - mariadb
     networks:
       - wp_network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9104/metrics"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
   # NGINX Exporter
   nginx-exporter:
@@ -182,6 +248,12 @@ services:
       - nginx
     networks:
       - wp_network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9113/metrics"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
   # Prometheus
   prometheus:
@@ -197,6 +269,12 @@ services:
       - nginx-exporter
     networks:
       - wp_network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
   # Grafana
   grafana:
@@ -211,6 +289,12 @@ services:
       - prometheus
     networks:
       - wp_network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
 # Volumes configuration
 volumes:

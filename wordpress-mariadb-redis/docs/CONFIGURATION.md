@@ -166,6 +166,97 @@ To further customize the setup, consider modifying:
 3. Redis memory settings
 4. NGINX caching parameters
 5. WordPress optimization plugins
+6. Docker healthcheck parameters
+
+## Docker Healthchecks
+
+All services in this setup include Docker healthchecks to ensure reliability and automatic recovery from failures:
+
+### Web Services
+- **NGINX**:
+  ```yaml
+  healthcheck:
+    test: ["CMD", "curl", "-f", "http://localhost:80"]
+    interval: 30s
+    timeout: 10s
+    retries: 3
+    start_period: 15s
+  ```
+  
+- **WordPress Instances**:
+  ```yaml
+  healthcheck:
+    test: ["CMD", "curl", "-f", "http://localhost"]
+    interval: 1m
+    timeout: 10s
+    retries: 3
+    start_period: 30s
+  ```
+
+- **phpMyAdmin**:
+  ```yaml
+  healthcheck:
+    test: ["CMD", "curl", "-f", "http://localhost:80"]
+    interval: 30s
+    timeout: 10s
+    retries: 3
+    start_period: 15s
+  ```
+
+### Database Services
+- **MariaDB**:
+  ```yaml
+  healthcheck:
+    test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+    interval: 30s
+    timeout: 10s
+    retries: 5
+    start_period: 30s
+  ```
+
+### Cache Services
+- **Redis**:
+  ```yaml
+  healthcheck:
+    test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+    interval: 30s
+    timeout: 10s
+    retries: 3
+    start_period: 15s
+  ```
+
+### Monitoring Services
+- **Exporters** (Redis, MariaDB, NGINX):
+  ```yaml
+  healthcheck:
+    test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:<PORT>/metrics"]
+    interval: 30s
+    timeout: 10s
+    retries: 3
+    start_period: 15s
+  ```
+
+- **Prometheus**:
+  ```yaml
+  healthcheck:
+    test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+    interval: 30s
+    timeout: 10s
+    retries: 3
+    start_period: 15s
+  ```
+
+- **Grafana**:
+  ```yaml
+  healthcheck:
+    test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+    interval: 30s
+    timeout: 10s
+    retries: 3
+    start_period: 15s
+  ```
+
+Customize these healthchecks based on your specific requirements and service response time expectations.
 
 See the [OPTIMIZATION.md](./OPTIMIZATION.md) and [SCALING.md](./SCALING.md) files for specific configuration improvements for high-traffic scenarios.
 
