@@ -1,5 +1,29 @@
-# Step 13 (new project): Plan for migration to Kubernetes for auto-scaling and zero-downtime deployments.
+# Step XX (new project): Plan for migration to Kubernetes for auto-scaling and zero-downtime deployments.
 
+# Step 13
+
+Implement MariaDB and Redis clustering for high availability and performance.
+
+MariaDB Master/Replica Architecture
+Approach 1: MariaDB Galera Cluster
+
+This is a synchronous multi-master cluster that provides:
+
+No single point of failure
+No slave lag
+Read/write to any node
+Automatic node provisioning
+
+Redis Master/Replica Architecture
+Redis Sentinel
+Monitors master and replica instances
+Automatic failover if master goes down
+Promotes a replica to master
+Notifies clients about the new master
+Redis Cluster
+Automatic partitioning across multiple nodes
+Continues operations when subset of nodes are experiencing failures
+Linear scalability up to 1000 nodes
 
 # Step 12 
 
@@ -63,7 +87,13 @@ Implement monitoring
 
 Prompt:
 ```
-show my network topology, including names, ip, services and relationships
+show my network topology, including names, ip, services and relationships.
+generate a mermaid diagram for network topology.
+```
+
+(Simple prompt)
+```
+generate a mermaid diagram of the docker compose setup.
 ```
 
 Output 
@@ -71,7 +101,8 @@ Output
 ```
 Here is your network topology including container names, IP addresses, services, and their relationships within the Docker networks:
 
-1. Network: bridge (default)
+
+<!-- 1. Network: bridge (default)
    - No containers currently connected.
 
 2. Network: host
@@ -81,6 +112,7 @@ Here is your network topology including container names, IP addresses, services,
      - kube-scheduler-docker-desktop (kube-system)
      - kube-controller-manager-docker-desktop (kube-system)
      - kube-apiserver-docker-desktop (kube-system)
+ -->
 
 3. Network: none
    - Containers (Kubernetes pods) with no IP addresses:
@@ -131,9 +163,6 @@ docker-compose.local.yml
 
 # Step 5
 Create a LICENSE file with the text of the chosen license (e.g., MIT License). Ensure that the license is compatible with the project and allows for redistribution and modification.
-
-
-
 
 # Step 4
 Create a README.md file that includes the following sections:
