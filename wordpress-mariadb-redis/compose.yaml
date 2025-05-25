@@ -295,6 +295,32 @@ services:
       timeout: 10s
       retries: 3
       start_period: 15s
+      
+  # Backup service configuration
+  backup:
+    build:
+      context: .
+      dockerfile: Dockerfile.backup
+    environment:
+      - BACKUP_SCHEDULE=${BACKUP_SCHEDULE:-0 2 * * *}  # Default: Every day at 2:00 AM
+      - BACKUP_RETENTION_DAYS=${BACKUP_RETENTION_DAYS:-7}  # Default: Keep backups for 7 days
+      - TZ=${TIMEZONE:-UTC}  # Default timezone
+    volumes:
+      - ./backups:/backups  # Mount local backup directory
+      - db_data:/var/lib/mysql:ro  # Mount MariaDB volume in read-only mode
+      - wordpress_uploads:/var/www/html/wp-content/uploads:ro  # Mount WordPress uploads in read-only mode
+      - redis_data_1:/redis1_data:ro  # Mount Redis-1 data in read-only mode
+      - redis_data_2:/redis2_data:ro  # Mount Redis-2 data in read-only mode
+      - grafana_data:/grafana_data:ro  # Mount Grafana data in read-only mode
+    networks:
+      - wp_network
+    depends_on:
+      - mariadb
+      - wordpress-1
+      - redis-1
+      - redis-2
+      - grafana
+    restart: unless-stopped
 
 # Volumes configuration
 volumes:

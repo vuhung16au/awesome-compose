@@ -21,3 +21,8 @@ PMA_PASSWORD=wordpress
 
 # Redis
 REDIS_PASSWORD=wordpress_redis
+
+# Backup configuration
+BACKUP_SCHEDULE=0 2 * * *         # Daily at 2:00 AM
+BACKUP_RETENTION_DAYS=7           # Keep backups for 7 days
+TIMEZONE=UTC                     # Timezone for backup scheduling

@@ -1,0 +1,35 @@
+FROM alpine:3.17
+
+# Install required packages
+RUN apk add --no-cache \
+    bash \
+    mariadb-client \
+    gzip \
+    tar \
+    tzdata \
+    coreutils
+
+# Set timezone
+ENV TZ=UTC
+
+# Create directories
+RUN mkdir -p /backups/databases \
+    && mkdir -p /backups/volumes \
+    && mkdir -p /scripts
+
+# Copy backup scripts
+COPY scripts/backup.sh /scripts/
+COPY scripts/restore.sh /scripts/
+COPY scripts/docker-backup-scheduler.sh /scripts/
+
+# Make scripts executable
+RUN chmod +x /scripts/*.sh
+
+# Set working directory
+WORKDIR /backups
+
+# Set entrypoint
+ENTRYPOINT ["/scripts/docker-backup-scheduler.sh"]
+
+# Default command (can be overridden)
+CMD []

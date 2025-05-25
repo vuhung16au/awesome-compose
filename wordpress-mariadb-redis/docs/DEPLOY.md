@@ -135,6 +135,25 @@ The script performs the following checks:
 
 This script is useful for troubleshooting connection issues and ensuring all components of the stack are working together properly.
 
+## Backup Configuration
+
+The stack comes with an integrated backup service that automatically backs up databases and volumes on a schedule. By default:
+
+- Backups run daily at 2:00 AM
+- Backups are retained for 7 days
+- All backup files are stored in the `backups/` directory
+
+You can customize these settings by adding the following to your `.env` file before deployment:
+
+```bash
+# Backup settings (optional)
+BACKUP_SCHEDULE=0 2 * * *  # Cron schedule format: daily at 2:00 AM
+BACKUP_RETENTION_DAYS=7     # Number of days to keep backups
+TIMEZONE=UTC               # Timezone for backup scheduling
+```
+
+For more details on backup configuration and restoration procedures, see [BACKUP.md](./BACKUP.md).
+
 ## Stopping Services
 
 ```bash
