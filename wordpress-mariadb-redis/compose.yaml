@@ -183,7 +183,7 @@ services:
 
   # Redis Exporter for redis-1
   redis-exporter-1:
-    image: oliver006/redis_exporter:latest
+    image: oliver006/redis_exporter:v1.54.0  # Pinned to specific version for stability
     environment:
       - REDIS_ADDR=redis-1:6379
       - REDIS_PASSWORD=${REDIS_PASSWORD}
@@ -202,7 +202,7 @@ services:
 
   # Redis Exporter for redis-2
   redis-exporter-2:
-    image: oliver006/redis_exporter:latest
+    image: oliver006/redis_exporter:v1.54.0  # Pinned to specific version for stability
     environment:
       - REDIS_ADDR=redis-2:6379
       - REDIS_PASSWORD=${REDIS_PASSWORD}
@@ -221,7 +221,7 @@ services:
 
   # MariaDB Exporter
   mariadb-exporter:
-    image: prom/mysqld-exporter:latest
+    image: prom/mysqld-exporter:v0.15.0  # Pinned to specific version for stability
     environment:
       - DATA_SOURCE_NAME=wordpress:wordpress@(mariadb:3306)/
     ports:
@@ -239,7 +239,7 @@ services:
 
   # NGINX Exporter
   nginx-exporter:
-    image: nginx/nginx-prometheus-exporter:latest
+    image: nginx/nginx-prometheus-exporter:0.11.0  # Pinned to specific version for stability
     command:
       - -nginx.scrape-uri=http://nginx:80/stub_status
     ports:
@@ -257,7 +257,7 @@ services:
 
   # Prometheus
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v2.45.0  # Pinned to specific version for stability
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     ports:
@@ -278,7 +278,7 @@ services:
 
   # Grafana
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:10.2.2  # Pinned to specific version for stability
     ports:
       - "3000:3000"
     environment:
