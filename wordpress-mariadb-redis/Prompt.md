@@ -1,5 +1,13 @@
 # Step XX (new project): Plan for migration to Kubernetes for auto-scaling and zero-downtime deployments.
 
+# Step 14 
+
+Ask Docker Gordon 
+
+- show sizes of images/containers/services in my docker compose
+- show memory usage for all services in my docker compose
+- show disk usage for all services in my docker compose
+
 # Step 13
 
 Implement MariaDB and Redis clustering for high availability and performance.

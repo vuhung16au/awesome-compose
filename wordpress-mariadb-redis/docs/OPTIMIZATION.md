@@ -47,21 +47,52 @@ The overall size reduction is 962MB (2,497MB - 1,535MB), which represents approx
 
 ## Total Docker Image and Volume Sizes
 
+### Image Sizes
+
 The total size of the Docker images used by your WordPress project containers is approximately:
 
-- WordPress images (3 instances): 286MB each × 3 = 858MB
+- WordPress images (3 instances): 286MB each × 3 = 858MB (shared 216.5MB)
 - phpMyAdmin image: 143MB
 - MariaDB image: 432MB
-- Redis image: 60.7MB
-- Nginx image: 75.9MB
+- Redis image (7.2-alpine): 60.7MB
+- Nginx image (stable-alpine): 75.9MB
+- Backup service image: 68.8MB
+- Grafana image (10.2.2): 522MB
+- Prometheus image (v2.45.0): 320MB
+- Redis Exporter image (v1.54.0): 24.6MB
 
-Adding these up gives roughly 1.57GB of image data.
+Adding these up gives roughly 2.50GB of image data, with optimized images used where possible.
 
-Regarding Docker volumes (which store persistent data like database files and uploads), their exact sizes depend on your actual data. You may check the sizes of the volume directories on your host system under Docker's volume storage path (usually `/var/lib/docker/volumes/`).
+### Container Sizes
 
-So, the total resource size includes about 1.57GB of images plus the size of your persistent data volumes, which depends on your actual data stored.
+Container sizes are minimal as they primarily represent the writable layer changes:
 
-Let me know if you want help with estimating volume sizes manually!
+| Container Name | Size |
+|---------------|------|
+| wordpress-mariadb-redis-wordpress-1-1 | 86 KB |
+| wordpress-mariadb-redis-wordpress-2-1 | 86 KB |
+| wordpress-mariadb-redis-wordpress-3-1 | 90.1 KB |
+| wordpress-mariadb-redis-phpmyadmin-1 | 94.2 KB |
+| wordpress-mariadb-redis-mariadb-1 | 24.6 KB |
+| wordpress-mariadb-redis-redis-1-1 | 4.1 KB |
+| wordpress-mariadb-redis-redis-2-1 | 4.1 KB |
+| wordpress-mariadb-redis-nginx-1 | 69.6 KB |
+| wordpress-mariadb-redis-grafana-1 | 4.1 KB |
+| wordpress-mariadb-redis-prometheus-1 | 4.1 KB |
+| wordpress-mariadb-redis-redis-exporter-1-1 | 4.1 KB |
+| wordpress-mariadb-redis-redis-exporter-2-1 | 4.1 KB |
+| wordpress-mariadb-redis-backup-1 | 61.4 KB |
+
+### Volume Sizes
+
+Actual measured volume sizes:
+
+- `wordpress-mariadb-redis_db_data`: 156.5 MB (MariaDB data)
+- `wordpress-mariadb-redis_grafana_data`: 38.27 MB (Grafana data)
+- `wordpress-mariadb-redis_redis_data_1` and `_2`: minimal usage (88 B each)
+- `wordpress-mariadb-redis_wordpress_uploads`: 0 B (WordPress uploads)
+
+The total resource size includes about 2.50GB of images plus approximately 195MB of volume data, though this will grow as WordPress content and database records increase.
 
 ## Performance Benefits of Redis Caching
 
@@ -86,6 +117,36 @@ Typical performance improvements with Redis caching:
 - **Load Balancing**: Distributes requests across multiple WordPress instances
 - **Connection Pooling**: Optimizes connection management to backend services
 - **HTTP/2 Support**: Modern protocol with multiplexing for better performance
+
+## Memory Usage Optimization
+
+The WordPress with MariaDB and Redis setup has been optimized for memory efficiency. Below is the current memory usage for all services:
+
+| Service Container Name                      | Memory Usage          |
+|---------------------------------------------|----------------------|
+| wordpress-mariadb-redis-mariadb-1            | 81 MiB / 7.654 GiB   |
+| wordpress-mariadb-redis-grafana-1            | 81.76 MiB / 7.654 GiB|
+| wordpress-mariadb-redis-prometheus-1         | 21.28 MiB / 7.654 GiB|
+| wordpress-mariadb-redis-wordpress-3-1        | 37.96 MiB / 7.654 GiB|
+| wordpress-mariadb-redis-wordpress-1-1        | 16.39 MiB / 7.654 GiB|
+| wordpress-mariadb-redis-wordpress-2-1        | 15.86 MiB / 7.654 GiB|
+| wordpress-mariadb-redis-phpmyadmin-1         | 16.08 MiB / 7.654 GiB|
+| wordpress-mariadb-redis-redis-exporter-1-1   | 13.32 MiB / 7.654 GiB|
+| wordpress-mariadb-redis-redis-exporter-2-1   | 15.06 MiB / 7.654 GiB|
+| wordpress-mariadb-redis-nginx-1              | 9.551 MiB / 7.654 GiB|
+| wordpress-mariadb-redis-redis-1-1            | 5.605 MiB / 7.654 GiB|
+| wordpress-mariadb-redis-redis-2-1            | 3.551 MiB / 7.654 GiB|
+| wordpress-mariadb-redis-backup-1             | 0B / 0B (restarting) |
+
+### Key Memory Optimization Features:
+
+- **Efficient Container Sizing**: Most containers use less than 40 MiB memory
+- **Alpine-Based Images**: Reduced memory footprint with Alpine Linux versions
+- **Redis Memory Efficiency**: Redis instances use minimal memory (3.5-5.6 MiB)
+- **PHP-FPM Tuning**: Optimized PHP memory limits for WordPress containers
+- **Shared Memory Usage**: Total memory consumption is approximately 317.4 MiB across all services
+
+The total memory footprint is remarkably low considering the full stack includes a WordPress cluster with three instances, MariaDB database, Redis caching, phpMyAdmin, Nginx load balancer, and monitoring tools (Prometheus and Grafana).
 
 ## WordPress Performance Enhancements
 
