@@ -114,4 +114,3 @@ aws s3 sync "$BACKUP_DIR" "s3://your-bucket/backups/"
 
 Backup logs are stored in `backups/backup.log`. It's recommended to check these logs periodically to ensure backups are completing successfully.
 
-For critical environments, consider setting up log monitoring to alert on backup failures.

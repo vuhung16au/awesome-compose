@@ -268,4 +268,3 @@ The architecture for this setup is detailed in the [Architecture](docs/ARCHITECT
 - Service interaction flow
 - Deployment topology
 
-Review the architecture document to understand the overall system design and how each component fits into the WordPress, MariaDB, and Redis ecosystem.

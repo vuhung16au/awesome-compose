@@ -308,9 +308,3 @@ graph TD;
     M --- |IP: 172.18.0.9| M
     N --- |State: Restarting| N
 ```
-
-This diagram provides an alternative visualization of the services and their interactions within the Docker Compose setup.
-
----
-
-If you want, I can help you generate this diagram in a graphical format or provide configuration details for any specific service.
