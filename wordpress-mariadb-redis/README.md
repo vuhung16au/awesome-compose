@@ -58,15 +58,18 @@ docker compose exec backup /scripts/backup.sh test
 - NGINX with reverse proxy and load balancing
 - phpMyAdmin for database management
 - Automated backup and restore scripts for databases and volumes
-- HTTPS support with self-signed certificates
+- HTTPS support with self-signed certificates (for dev environments)
+- Monitoring stack with Prometheus and Grafana
 - Health checks for all services to ensure automatic restarts
 
 ## Accessing Services
 
 - WordPress: https://localhost/
 - phpMyAdmin: http://localhost:8080 (user: wordpress, password: wordpress)
+- Grafana: http://localhost:3000 (default user: admin, password: admin)
+- Prometheus: http://localhost:9090
 
-> **Default passwords and environment variables can be found in the `dotevn-sample` or `.env` file.**
+> **Default passwords and environment variables can be found in the `dotevn-sample` (or your `.env`) file.**
 
 ## Documentation
 
@@ -78,12 +81,6 @@ docker compose exec backup /scripts/backup.sh test
 - [Scaling](docs/SCALING.md) - Scaling strategies for high traffic
 - [Configuration](docs/CONFIGURATION.md) - Configuration details for each service
 - [Monitoring](docs/MONITORING.md) - Monitoring stack with Prometheus, Grafana, and exporters for Redis, MariaDB, and NGINX
-
-> ℹ️ **_INFO_**
->
-> For compatibility between `AMD64` and `ARM64` architecture, MariaDB is used as the database.
-> MariaDB 10 is compatible with both architectures and works well with WordPress as of 2025.
-> Note: WordPress does not natively support PostgreSQL but is fully compatible with MySQL/MariaDB, which is why MariaDB was chosen as the database solution.
 
 ## License
 

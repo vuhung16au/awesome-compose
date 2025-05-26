@@ -1,5 +1,22 @@
 # Step XX (new project): Plan for migration to Kubernetes for auto-scaling and zero-downtime deployments.
 
+# Step 15
+
+Migrate some parts of the services using devbox 
+
+```json
+{
+  "packages": [
+    "docker",
+    "docker-compose"
+  ],
+  "scripts": {
+    "up": "docker compose up -d",
+    "down": "docker compose down"
+  }
+}
+```
+
 # Step 14 
 
 Ask Docker Gordon 
