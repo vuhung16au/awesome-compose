@@ -291,3 +291,17 @@ XXX Website Clone - WordPress Backlog
 - [ ] Set up development vs production environment variables
 - [ ] Implement SSL certificate for secure forms
 - [ ] Configure email SMTP for form notifications
+
+# Step 1: The first prompt 
+
+This is the Wordpress website I want to clone https://www.xxxsolar.com.au/ using current Wordpress docker compose
+
+The sample backlog is already in #file:BACKLOG.md
+
+pls help me finish the backlog items.
+
+This is the Wordpress website I want to clone https://www.xxxsolar.com.au/ using current Wordpress docker compose
+
+The sample backlog is already in #file:BACKLOG.md
+
+pls help me finish the backlog items.
