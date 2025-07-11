@@ -91,15 +91,41 @@ services:
 When deploying this setup, docker compose maps the WordPress container port 80 to
 port 80 of the host, and phpMyAdmin port 80 to port 8080 of the host as specified in the compose file.
 
-## Deploy with docker compose
+## How to Start the Services
+
+### Quick Start
+
+To start all services in the background (detached mode):
+
+```bash
+docker compose up -d
+```
+
+### Alternative: Using the minimal setup
+
+If you prefer the minimal MariaDB setup without phpMyAdmin:
+
+```bash
+docker compose -f compose.yaml up -d
+```
+
+### Viewing logs during startup
+
+To see the startup process and logs:
+
+```bash
+docker compose up
+```
+
+### Expected output when starting
 
 ```bash
 $ docker compose up -d
-Creating network "wordpress-mysql_wordpress_network" with the default driver
-Creating volume "wordpress-mysql_db_data" with default driver
-Creating wordpress-mysql_db_1          ... done
-Creating wordpress-mysql_wordpress_1   ... done
-Creating wordpress-mysql_phpmyadmin_1  ... done
+[+] Creating network "wordpress-mysql_wordpress_network" with the default driver
+[+] Creating volume "wordpress-mysql_db_data" with default driver
+[+] Creating wordpress-mysql_db_1          ... done
+[+] Creating wordpress-mysql_wordpress_1   ... done
+[+] Creating wordpress-mysql_phpmyadmin_1  ... done
 ```
 
 ## Expected result
@@ -116,11 +142,13 @@ ddeeff789012   wordpress:latest     "docker-entrypoint.s…"   30 seconds ago   
 
 ## Accessing the Services
 
-### WordPress
+### Access WordPress
+
 - Navigate to `http://localhost:80` in your web browser to access WordPress.
 - Follow the WordPress setup wizard to complete installation.
 
-### phpMyAdmin
+### Access phpMyAdmin
+
 - Navigate to `http://localhost:8080` in your web browser to access phpMyAdmin.
 - Login using the MySQL credentials:
   - Username: wordpress
@@ -133,14 +161,15 @@ ddeeff789012   wordpress:latest     "docker-entrypoint.s…"   30 seconds ago   
 ### Stop and remove the containers
 
 ```bash
-$ docker compose down
+docker compose down
 ```
 
 ### Remove all data (including database data)
+
 To remove all WordPress and database data, delete the named volumes by passing the `-v` parameter:
 
 ```bash
-$ docker compose down -v
+docker compose down -v
 ```
 
 ## Troubleshooting
@@ -148,7 +177,7 @@ $ docker compose down -v
 If any service fails to start, check the logs using:
 
 ```bash
-$ docker compose logs <service_name>
+docker compose logs <service_name>
 ```
 
 Where `<service_name>` is one of: `wordpress`, `db`, or `phpmyadmin`.
