@@ -37,7 +37,7 @@ When deploying this setup, the pgAdmin web interface will be available at port 5
 Use the pgAdmin credentials from the `.env` file to log in.
 
 ``` shell
-$ docker compose up
+$ docker compose up -d 
 Starting postgres ... done
 Starting pgadmin ... done
 ```
