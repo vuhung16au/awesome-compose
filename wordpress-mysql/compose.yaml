@@ -9,7 +9,7 @@ services:
       - db_data:/var/lib/mysql
     restart: always
     environment:
-      - MYSQL_ROOT_PASSWORD=somewordpress
+      - MYSQL_ROOT_PASSWORD=mysql
       - MYSQL_DATABASE=wordpress
       - MYSQL_USER=wordpress
       - MYSQL_PASSWORD=wordpress
@@ -26,6 +26,23 @@ services:
       - WORDPRESS_DB_USER=wordpress
       - WORDPRESS_DB_PASSWORD=wordpress
       - WORDPRESS_DB_NAME=wordpress
+    volumes:
+      # Mount WordPress core files to local directory
+      - ./wordpress:/var/www/html
+      # Mount wp-content for themes and plugins
+      - ./wp-content:/var/www/html/wp-content
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    ports:
+      - 8080:80
+    restart: always
+    environment:
+      - PMA_HOST=db
+      - PMA_PORT=3306
+      - PMA_USER=root
+      - PMA_PASSWORD=mysql
+    depends_on:
+      - db
 volumes:
   db_data:
 
